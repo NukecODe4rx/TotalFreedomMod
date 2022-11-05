@@ -23,7 +23,7 @@ public class PlayerData
     private Boolean masterBuilder = false;
 
 
-    private String rideMode = "ask";
+    private RideMode rideMode = RideMode.ASK;
 
 
     private int coins;
@@ -51,7 +51,7 @@ public class PlayerData
             tag = resultSet.getString("tag");
             discordID = resultSet.getString("discord_id");
             masterBuilder = resultSet.getBoolean("master_builder");
-            rideMode = resultSet.getString("ride_mode");
+            rideMode = RideMode.valueOf(resultSet.getString("ride_mode").toUpperCase());
             coins = resultSet.getInt("coins");
             items.clear();
             items.addAll(FUtil.stringToList(resultSet.getString("items")));
@@ -82,7 +82,7 @@ public class PlayerData
                 "- Total Votes: " + totalVotes + "\n" +
                 "- Display Discord: " + displayDiscord + "\n" +
                 "- Tag: " + FUtil.colorize(tag) + ChatColor.GRAY + "\n" +
-                "- Ride Mode: " + rideMode + "\n" +
+                "- Ride Mode: " + rideMode.name() + "\n" +
                 "- Login Message: " + loginMessage;
     }
 
@@ -194,7 +194,7 @@ public class PlayerData
             put("tag", tag);
             put("discord_id", discordID);
             put("master_builder", masterBuilder);
-            put("ride_mode", rideMode);
+            put("ride_mode", rideMode.name());
             put("coins", coins);
             put("items", FUtil.listToString(items));
             put("total_votes", totalVotes);
@@ -249,12 +249,12 @@ public class PlayerData
         this.masterBuilder = masterBuilder;
     }
 
-    public String getRideMode()
+    public RideMode getRideMode()
     {
         return rideMode;
     }
 
-    public void setRideMode(String rideMode)
+    public void setRideMode(RideMode rideMode)
     {
         this.rideMode = rideMode;
     }
@@ -307,5 +307,12 @@ public class PlayerData
     public void setInspect(Boolean inspect)
     {
         this.inspect = inspect;
+    }
+
+    public enum RideMode
+    {
+        ASK,
+        NORMAL,
+        OFF
     }
 }

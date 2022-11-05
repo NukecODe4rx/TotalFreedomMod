@@ -249,7 +249,7 @@ public class SQLite extends FreedomService
             statement.setString(4, player.getTag());
             statement.setString(5, player.getDiscordID());
             statement.setBoolean(6, player.isMasterBuilder());
-            statement.setString(7, player.getRideMode());
+            statement.setString(7, player.getRideMode().name());
             statement.setInt(8, player.getCoins());
             statement.setString(9, FUtil.listToString(player.getItems()));
             statement.setInt(10, player.getTotalVotes());
