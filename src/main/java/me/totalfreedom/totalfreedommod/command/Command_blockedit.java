@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @CommandPermissions(level = Rank.ADMIN, source = SourceType.BOTH)
-@CommandParameters(description = "Restricts/restores block modification abilities for everyone on the server or a certain player.", usage = "/<command> [[-s] <player> [reason] | list | purge | all]")
+@CommandParameters(description = "Restricts/restores block modification abilities for everyone on the server or a certain player.", usage = "/<command> [<player> [reason] | list | purge | all]")
 public class Command_blockedit extends FreedomCommand
 {
     @Override

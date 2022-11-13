@@ -294,7 +294,6 @@ public class FPlayer
     public void setMuted(boolean muted, int minutes)
     {
         FUtil.cancel(unmuteTask);
-        plugin.mu.MUTED_PLAYERS.remove(getPlayer().getName());
         unmuteTask = null;
 
         if (!muted)
@@ -306,8 +305,6 @@ public class FPlayer
         {
             return;
         }
-
-        plugin.mu.MUTED_PLAYERS.add(getPlayer().getName());
 
         // TODO: Simplify this into a Consumer<BukkitTask> lambda?
         unmuteTask = new BukkitRunnable()
@@ -323,7 +320,6 @@ public class FPlayer
                 else
                 {
                     FUtil.adminAction(ConfigEntry.SERVER_NAME.getString(), "Unmuting " + getName(), false);
-                    plugin.mu.MUTED_PLAYERS.remove(getName());
                 }
             }
         }.runTaskLater(plugin, minutes * (60L * 20L));
