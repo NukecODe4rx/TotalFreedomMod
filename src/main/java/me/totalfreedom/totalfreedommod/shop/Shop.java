@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -409,6 +410,25 @@ public class Shop extends FreedomService
 
         player.closeInventory();
 
+    }
+
+    @EventHandler
+    public void onPlayerChat(AsyncPlayerChatEvent event)
+    {
+        String message = event.getMessage();
+        Player player = event.getPlayer();
+
+        if (ConfigEntry.SHOP_ENABLED.getBoolean() && ConfigEntry.SHOP_REACTIONS_ENABLED.getBoolean()
+                && !plugin.sh.reactionString.isEmpty() && message.equals(plugin.sh.reactionString))
+        {
+            event.setCancelled(true);
+            PlayerData data = plugin.pl.getData(player);
+            data.setCoins(data.getCoins() + plugin.sh.coinsPerReactionWin);
+            plugin.pl.save(data);
+            plugin.sh.endReaction(player.getName());
+            player.sendMessage(ChatColor.GREEN + "You have been given " + ChatColor.GOLD
+                    + plugin.sh.coinsPerReactionWin + ChatColor.GREEN + " coins!");
+        }
     }
 
     public ShopItem getShopItem(int slot)

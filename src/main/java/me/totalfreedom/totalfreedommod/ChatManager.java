@@ -4,13 +4,11 @@ import com.google.common.base.Strings;
 import me.totalfreedom.totalfreedommod.admin.Admin;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
-import me.totalfreedom.totalfreedommod.player.PlayerData;
 import me.totalfreedom.totalfreedommod.rank.Displayable;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import me.totalfreedom.totalfreedommod.util.FSync;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.command.CommandSender;
@@ -54,17 +52,6 @@ public class ChatManager extends FreedomService
         message = FUtil.colorize(message);
         message = message.replaceAll(ChatColor.MAGIC.toString(), "&k");
 
-        if (ConfigEntry.SHOP_ENABLED.getBoolean() && ConfigEntry.SHOP_REACTIONS_ENABLED.getBoolean() && !plugin.sh.reactionString.isEmpty() && message.equals(plugin.sh.reactionString))
-        {
-            event.setCancelled(true);
-            PlayerData data = plugin.pl.getData(player);
-            data.setCoins(data.getCoins() + plugin.sh.coinsPerReactionWin);
-            plugin.pl.save(data);
-            plugin.sh.endReaction(player.getName());
-            player.sendMessage(ChatColor.GREEN + "You have been given " + ChatColor.GOLD + plugin.sh.coinsPerReactionWin + ChatColor.GREEN + " coins!");
-            return;
-        }
-
         if (!ConfigEntry.TOGGLE_CHAT.getBoolean() && !plugin.al.isAdmin(player))
         {
             event.setCancelled(true);
@@ -96,10 +83,11 @@ public class ChatManager extends FreedomService
         }
 
         // Check for 4chan trigger
-        boolean green = ChatColor.stripColor(message).toLowerCase().startsWith(">");
-        boolean orange = ChatColor.stripColor(message).toLowerCase().endsWith("<");
         if (ConfigEntry.FOURCHAN_ENABLED.getBoolean())
         {
+            boolean green = ChatColor.stripColor(message).toLowerCase().startsWith(">");
+            boolean orange = ChatColor.stripColor(message).toLowerCase().endsWith("<");
+
             if (green)
             {
                 message = ChatColor.GREEN + message;
@@ -123,23 +111,27 @@ public class ChatManager extends FreedomService
         }
 
         // Check for mentions
-        boolean mentionEveryone = ChatColor.stripColor(message).toLowerCase().contains("@everyone") && plugin.al.isAdmin(player);
-        for (Player p : server.getOnlinePlayers())
+        String stripped = ChatColor.stripColor(message).toLowerCase();
+
+        /* There is an issue would have allowed muted players to ping players. The issue is caused by the order in which
+        *   these event handlers are registered when the plugin starts up. Muter is registered after the ChatManager,
+        *   which results in latter being called first (before the former can cancel it). EventPriority does not seem to
+        *   make a difference. As a short-term solution I've added this mute check alongside the usual isCancelled check
+        *   so that the issue is mitigated, but a long-term solution should be to change the order in which things like
+        *   ChatManager and Muter are registered. */
+        if (!event.isCancelled() && !plugin.pl.getPlayer(player).isMuted())
         {
-            if (ChatColor.stripColor(message).toLowerCase().contains("@" + p.getName().toLowerCase()) || mentionEveryone)
+            server.getOnlinePlayers().forEach(pl ->
             {
-                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 1337F, 0.9F);
-            }
+                if (stripped.contains("@" + pl.getName()) || (plugin.al.isAdmin(player) && stripped.contains("@everyone")))
+                {
+                    pl.playSound(pl.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 1337F, 0.9F);
+                }
+            });
         }
 
         // Set format
         event.setFormat(format);
-
-        // Send to discord
-        if (!Bukkit.hasWhitelist() && !plugin.pl.getPlayer(player).isMuted())
-        {
-            plugin.dc.messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message));
-        }
     }
 
     public ChatColor getColor(Displayable display)
@@ -162,7 +154,8 @@ public class ChatManager extends FreedomService
         server.getOnlinePlayers().stream().filter(player -> plugin.al.isAdmin(player)).forEach(player ->
         {
             Admin admin = plugin.al.getAdmin(player);
-            if (!Strings.isNullOrEmpty(admin.getAcFormat())) {
+            if (!Strings.isNullOrEmpty(admin.getAcFormat()))
+            {
                 String format = admin.getAcFormat();
                 ChatColor color = getColor(display);
                 String msg = format.replace("%name%", sender.getName()).replace("%rank%", display.getAbbr()).replace("%rankcolor%", color.toString()).replace("%msg%", message);
