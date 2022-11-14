@@ -1,14 +1,10 @@
 package me.totalfreedom.totalfreedommod.blocking;
 
-import java.util.List;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
-import me.totalfreedom.totalfreedommod.util.Groups;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Banner;
 import org.bukkit.block.Skull;
-import org.bukkit.block.banner.Pattern;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -185,18 +181,6 @@ public class BlockBlocker extends FreedomService
             {
                 // Do nothing
                 break;
-            }
-        }
-
-        if (Groups.BANNERS.contains(event.getBlockPlaced().getType()))
-        {
-            Banner banner = (Banner)event.getBlockPlaced().getState();
-            List<Pattern> patterns = banner.getPatterns();
-
-            if (patterns.size() >= 2)
-            {
-                banner.setPatterns(patterns.subList(0, 2));
-                player.sendMessage(ChatColor.GRAY + "Your banner had too many patterns on it, so some were removed.");
             }
         }
     }
