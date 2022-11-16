@@ -1,81 +1,59 @@
 package me.totalfreedom.totalfreedommod.bridge;
 
-import java.io.File;
-import java.sql.*;
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+
 import me.totalfreedom.totalfreedommod.FreedomService;
-import me.totalfreedom.totalfreedommod.config.ConfigEntry;
-import me.totalfreedom.totalfreedommod.player.PlayerData;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
+import net.coreprotect.utility.Util;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.World;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 public class CoreProtectBridge extends FreedomService
 {
-    public static Map<Player, FUtil.PaginationList<String>> HISTORY_MAP = new HashMap<>();
-    private final List<String> tables = Arrays.asList("co_sign", "co_session", "co_container", "co_block");
+    //-- Block Inspector --//
+    private static final Component name = Component.text("Block Inspector").color(TextColor.color(0x30ade4));
+    private static final Component header = Component.text("---- ").append(name)
+            .append(Component.text(" ---- ")).colorIfAbsent(NamedTextColor.WHITE);
+    private static final Component prefix = name.append(Component.text(" - ").color(NamedTextColor.WHITE))
+            .colorIfAbsent(NamedTextColor.WHITE);
+    //--
+    private final HashMap<UUID, Long> cooldownMap = new HashMap<>();
+    private HashMap<UUID, FUtil.PaginationList<CoreProtectAPI.ParseResult>> historyMap;
 
-    private final HashMap<String, Long> cooldown = new HashMap<>();
+    //---------------------//
     private CoreProtectAPI coreProtectAPI = null;
-    private BukkitTask wiper;
 
     public static Long getSecondsLeft(long prevTime, int timeAdd)
     {
         return prevTime / 1000L + timeAdd - System.currentTimeMillis() / 1000L;
     }
 
-    // Unix timestamp converter taken from Functions class in CoreProtect, not my code
-    public static String getTimeAgo(int logTime, int currentTime)
-    {
-        StringBuilder message = new StringBuilder();
-        double timeSince = (double)currentTime - ((double)logTime + 0.0D);
-        timeSince /= 60.0D;
-        if (timeSince < 60.0D)
-        {
-            message.append((new DecimalFormat("0.00")).format(timeSince)).append("/m ago");
-        }
-
-        if (message.length() == 0)
-        {
-            timeSince /= 60.0D;
-            if (timeSince < 24.0D)
-            {
-                message.append((new DecimalFormat("0.00")).format(timeSince)).append("/h ago");
-            }
-        }
-
-        if (message.length() == 0)
-        {
-            timeSince /= 24.0D;
-            message.append((new DecimalFormat("0.00")).format(timeSince)).append("/d ago");
-        }
-
-        return message.toString();
-    }
-
     @Override
     public void onStart()
     {
+        if (isEnabled())
+        {
+            historyMap = new HashMap<>();
+        }
     }
 
     @Override
@@ -88,7 +66,7 @@ public class CoreProtectBridge extends FreedomService
         CoreProtect coreProtect = null;
         try
         {
-            final Plugin coreProtectPlugin = Bukkit.getServer().getPluginManager().getPlugin("CoreProtect");
+            final Plugin coreProtectPlugin = server.getPluginManager().getPlugin("CoreProtect");
             assert coreProtectPlugin != null;
             if (coreProtectPlugin instanceof CoreProtect)
             {
@@ -129,6 +107,11 @@ public class CoreProtectBridge extends FreedomService
 
     public boolean isEnabled()
     {
+        if (!server.getPluginManager().isPluginEnabled("CoreProtect"))
+        {
+            return false;
+        }
+
         final CoreProtect coreProtect = getCoreProtect();
 
         return coreProtect != null && coreProtect.isEnabled();
@@ -137,12 +120,12 @@ public class CoreProtectBridge extends FreedomService
     // Rollback the specified player's edits that were in the last 24 hours.
     public void rollback(final String name)
     {
-        final CoreProtectAPI coreProtect = getCoreProtectAPI();
-
         if (!isEnabled())
         {
             return;
         }
+
+        final CoreProtectAPI coreProtect = getCoreProtectAPI();
 
         new BukkitRunnable()
         {
@@ -157,12 +140,12 @@ public class CoreProtectBridge extends FreedomService
     // Reverts a rollback for the specified player's edits that were in the last 24 hours.
     public void restore(final String name)
     {
-        final CoreProtectAPI coreProtect = getCoreProtectAPI();
-
         if (!isEnabled())
         {
             return;
         }
+
+        final CoreProtectAPI coreProtect = getCoreProtectAPI();
 
         new BukkitRunnable()
         {
@@ -174,264 +157,190 @@ public class CoreProtectBridge extends FreedomService
         }.runTaskAsynchronously(plugin);
     }
 
-    public File getDatabase()
+    public boolean hasHistory(Player player)
     {
-        if (!isEnabled())
-        {
-            return null;
-        }
-
-        return (new File(getCoreProtect().getDataFolder(), "database.db"));
+        return historyMap.containsKey(player.getUniqueId());
     }
 
-    public double getDBSize()
+    public FUtil.PaginationList<CoreProtectAPI.ParseResult> getHistoryForPlayer(Player player)
     {
-        double bytes = getDatabase().length();
-        double kilobytes = (bytes / 1024);
-        double megabytes = (kilobytes / 1024);
-        return (megabytes / 1024);
+        return historyMap.get(player.getUniqueId());
     }
 
-    public void clearDatabase(World world)
+    public void showPageToPlayer(Player player, FUtil.PaginationList<CoreProtectAPI.ParseResult> results, int pageNum)
     {
-        clearDatabase(world, false);
-    }
-
-    // Wipes DB for the specified world
-    public void clearDatabase(World world, Boolean shutdown)
-    {
-        if (!ConfigEntry.COREPROTECT_MYSQL_ENABLED.getBoolean())
-        {
-            return;
-        }
-        final CoreProtect coreProtect = getCoreProtect();
-
-        if (coreProtect == null)
+        // No funny business allowed here
+        pageNum = Math.abs(pageNum);
+        if (player == null || !player.isOnline())
         {
             return;
         }
 
-        /* As CoreProtect doesn't have an API method for deleting all of the data for a specific world
-           we have to do this manually via SQL */
-        Connection connection;
-        try
+        List<CoreProtectAPI.ParseResult> page = results.getPage(pageNum);
+
+        if (page == null || page.isEmpty())
         {
-            String host = ConfigEntry.COREPROTECT_MYSQL_HOST.getString();
-            String port = ConfigEntry.COREPROTECT_MYSQL_PORT.getString();
-            String username = ConfigEntry.COREPROTECT_MYSQL_USERNAME.getString();
-            String password = ConfigEntry.COREPROTECT_MYSQL_PASSWORD.getString();
-            String database = ConfigEntry.COREPROTECT_MYSQL_DATABASE.getString();
-            String url = host + ":" + port + "/" + database + "?user=" + username + "&password=" + password + "&useSSL=false";
-            connection = DriverManager.getConnection("jdbc:sql://" + url);
-            final PreparedStatement statement = connection.prepareStatement("SELECT id FROM co_world WHERE world = ?");
-            statement.setQueryTimeout(30);
-
-            // Obtain world ID from CoreProtect database
-            statement.setString(1, world.getName());
-            ResultSet resultSet = statement.executeQuery();
-            String worldID = null;
-            while (resultSet.next())
-            {
-                worldID = String.valueOf(resultSet.getInt("id"));
-            }
-
-            // Ensure the world ID is not null
-
-            if (worldID == null)
-            {
-                FLog.warning("Failed to obtain the world ID for the " + world.getName());
-                return;
-            }
-
-            // Iterate through each table and delete their data if the world ID matches
-            for (String table : tables)
-            {
-                final PreparedStatement statement1 = connection.prepareStatement("DELETE FROM ? WHERE wid = ?");
-                statement1.setString(1, table);
-                statement1.setString(2, worldID);
-                statement1.executeQuery();
-            }
-
-            connection.close();
-
+            player.sendMessage(prefix.append(Component.text("No results were found.", NamedTextColor.WHITE)));
         }
-        catch (SQLException e)
+        else
         {
-            FLog.warning("Failed to delete the CoreProtect data for the " + world.getName());
+            // This shouldn't change at all in any of the other entries, so this should be safe
+            Component location = Component.text(String.format("(%s, %s, %s)", results.get(0).getX(),
+                    results.get(0).getY(), results.get(0).getZ()));
+            final long time = System.currentTimeMillis() / 1000;
+
+            player.sendMessage(header.append(location.color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC)));
+            page.forEach(entry ->
+            {
+                TextComponent.Builder line = Component.text();
+
+                // Time
+                line.append(Component.text(Util.getTimeSince(entry.getTime(), time, false))
+                        .color(NamedTextColor.GRAY));
+
+                // Action
+                Component action = Component.text(" interacted with ");
+                Component symbol = Component.text(" - ", NamedTextColor.WHITE);
+                switch (entry.getActionId())
+                {
+                    case 0 ->
+                    {
+                        action = Component.text(" broke ");
+                        symbol = Component.text(" - ", NamedTextColor.RED);
+                    }
+                    case 1 ->
+                    {
+                        action = Component.text(" placed ");
+                        symbol = Component.text(" + ", NamedTextColor.GREEN);
+                    }
+                    case 2 -> action = Component.text(" clicked ");
+                    default ->
+                    {
+                        // Do nothing (shuts Codacy up)
+                    }
+                }
+                line.append(symbol);
+
+                // Player
+                line.append(Component.text(entry.getPlayer()).color(TextColor.color(0x30ade4)));
+
+                // Action, Part 2
+                line.append(action.color(NamedTextColor.WHITE));
+
+                // Block
+                line.append(Component.text(entry.getBlockData().getMaterial().name().toLowerCase())
+                        .color(TextColor.color(0x30ade4)));
+
+                // Rolled back?
+                if (entry.isRolledBack())
+                {
+                    line.decorate(TextDecoration.STRIKETHROUGH);
+                }
+
+                player.sendMessage(line.append(Component.text(".", NamedTextColor.WHITE)).build());
+            });
+
+            if (results.getPageCount() > 1)
+            {
+                player.sendMessage(Component.text("-----", NamedTextColor.WHITE));
+
+                // Page indicator
+                TextComponent.Builder indicator = Component.text();
+
+                // <-
+                if (pageNum > 1)
+                {
+                    indicator.append(Component.text("◀ ", NamedTextColor.WHITE).clickEvent(
+                            ClickEvent.runCommand("/ins history " + (pageNum - 1))));
+                }
+
+                // Page <current>/<total>
+                indicator.append(Component.text("Page ", TextColor.color(0x30ade4)).append(Component.text(pageNum + "/"
+                        + results.getPageCount(), NamedTextColor.WHITE)));
+
+                // ->
+                if (pageNum < results.getPageCount())
+                {
+                    indicator.append(Component.text(" ▶", NamedTextColor.WHITE).clickEvent(
+                            ClickEvent.runCommand("/ins history  " + (pageNum + 1))));
+                }
+
+                // | Use /ins history <page> for advanced navigation
+                indicator.append(Component.text(" | ", NamedTextColor.GRAY).append(Component.text("Use ", NamedTextColor.WHITE)
+                        .append(Component.text("/ins history <page>", TextColor.color(0x30ade4))
+                                .clickEvent(ClickEvent.suggestCommand("/ins history ")))
+                        .append(Component.text(" for advanced navigation", NamedTextColor.WHITE))));
+
+                player.sendMessage(indicator.build());
+            }
         }
+    }
+
+    public CompletableFuture<FUtil.PaginationList<CoreProtectAPI.ParseResult>> lookupForPlayer(Block block, Player player)
+    {
+        cooldownMap.put(player.getUniqueId(), System.currentTimeMillis());
+        CoreProtectAPI api = getCoreProtectAPI();
+
+        return CompletableFuture.supplyAsync(() ->
+        {
+            historyMap.remove(player.getUniqueId());
+            FUtil.PaginationList<CoreProtectAPI.ParseResult> pages = new FUtil.PaginationList<>(10);
+            api.blockLookup(block, -1).forEach(stringArray -> pages.add(api.parseResult(stringArray)));
+            historyMap.put(player.getUniqueId(), pages);
+            return pages;
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerInteract(PlayerInteractEvent event)
+    public void onInteract(PlayerInteractEvent event)
     {
-        Player player = event.getPlayer();
-        PlayerData data = plugin.pl.getData(player);
-        Block block = event.getClickedBlock();
-        final CoreProtectAPI coreProtect = getCoreProtectAPI();
-
-        // TODO: Rewrite this
-        if (data.hasInspection())
+        // The inspector only works if we have CoreProtect installed
+        if (!isEnabled())
         {
-            int cooldownTime = 3;
+            return;
+        }
 
-            // Cooldown check
-            if ((event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_BLOCK)
-                    && cooldown.containsKey(player.getName()))
+        Player player = event.getPlayer();
+
+        if ((event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK)
+                && plugin.pl.getData(player.getUniqueId()).hasInspection())
+        {
+            event.setCancelled(true);
+            Block block = event.getClickedBlock();
+            Optional<Long> cooldown = Optional.ofNullable(cooldownMap.get(player.getUniqueId()));
+
+            if (cooldown.isPresent() && getSecondsLeft(cooldown.get(), 3) > 0L)
             {
-                long secondsLeft = getSecondsLeft(cooldown.get(player.getName()), cooldownTime);
-                if (secondsLeft > 0L)
-                {
-                    event.setCancelled(true);
-                    player.sendMessage(ChatColor.RED + String.valueOf(secondsLeft) + " seconds left before next query.");
-                    return;
-                }
+                player.sendMessage(prefix.append(Component.text("You need to wait ")
+                        .append(Component.text(getSecondsLeft(cooldown.get(), 3)))
+                        .append(Component.text(" seconds before you can make another query."))
+                        .color(NamedTextColor.WHITE)));
+                return;
             }
 
-            // Actual lookup time
-            if (event.getAction() == Action.LEFT_CLICK_BLOCK)
+            // Time to do a look-up.
+            if (block != null)
             {
-                if (block != null)
+                /* This is a hack to make it so that when you right-click, the coordinates that get used depend on
+                 *  what's in your hand. Non-blocks use the block you clicked directly, but blocks use wherever the
+                 *  block was supposed to be placed. */
+                ItemStack hand = player.getInventory().getItemInMainHand();
+                if (event.getAction() == Action.RIGHT_CLICK_BLOCK && hand.getType().isBlock() && hand.getType() != Material.AIR)
                 {
-                    event.setCancelled(true);
-                    List<String[]> lookup = coreProtect.blockLookup(block, -1);
-
-                    if (!plugin.al.isAdmin(player))
-                    {
-                        cooldown.put(player.getName(), System.currentTimeMillis());
-                    }
-
-                    if (lookup != null)
-                    {
-                        if (lookup.isEmpty())
-                        {
-                            player.sendMessage(net.md_5.bungee.api.ChatColor.of("#30ade4") + "Block Inspector " + ChatColor.WHITE + "- " + "No block data found for this location");
-                            return;
-                        }
-
-                        HISTORY_MAP.remove(event.getPlayer());
-                        HISTORY_MAP.put(event.getPlayer(), new FUtil.PaginationList<>(10));
-                        FUtil.PaginationList<String> paged = HISTORY_MAP.get(event.getPlayer());
-
-                        player.sendMessage("---- " + net.md_5.bungee.api.ChatColor.of("#30ade4") + "Block Inspector" + ChatColor.WHITE + " ---- " +
-                                ChatColor.GRAY + "(x" + block.getX() + "/" + "y" + block.getY() + "/" + "z" + block.getZ() + ")");
-
-                        for (String[] value : lookup)
-                        {
-                            CoreProtectAPI.ParseResult result = coreProtect.parseResult(value);
-                            BlockData bl = result.getBlockData();
-
-                            String s;
-                            String st = "";
-
-                            if (result.getActionString().equals("Placement"))
-                            {
-                                s = " placed ";
-                            }
-                            else if (result.getActionString().equals("Removal"))
-                            {
-                                s = " broke ";
-                            }
-                            else
-                            {
-                                s = " interacted with ";
-                            }
-
-                            if (result.isRolledBack())
-                            {
-                                st += "§m";
-                            }
-
-                            int time = (int)(System.currentTimeMillis() / 1000L);
-
-                            paged.add(ChatColor.GRAY + getTimeAgo(result.getTime(), time) + ChatColor.WHITE + " - " + net.md_5.bungee.api.ChatColor.of("#30ade4") +
-                                    st + result.getPlayer() + ChatColor.WHITE + st + s + net.md_5.bungee.api.ChatColor.of("#30ade4") + st + bl.getMaterial().toString().toLowerCase());
-                        }
-
-                        List<String> page = paged.getPage(1);
-                        for (String entries : page)
-                        {
-                            player.sendMessage(entries);
-                        }
-
-                        player.sendMessage("Page 1/" + paged.getPageCount() + " | To index through the pages, type " + net.md_5.bungee.api.ChatColor.of("#30ade4") + "/ins history <page>");
-                    }
+                    block = block.getRelative(event.getBlockFace()).getState().getBlock();
                 }
-            }
-            else if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
-            {
-                if (block != null)
+
+                lookupForPlayer(block, player).thenAccept(results ->
                 {
-                    BlockState blockState = block.getRelative(event.getBlockFace()).getState();
-                    Block placedBlock = blockState.getBlock();
-                    event.setCancelled(true);
-                    List<String[]> lookup = coreProtect.blockLookup(placedBlock, -1);
-
-                    if (lookup.isEmpty())
+                    if (results.isEmpty())
                     {
-                        lookup = coreProtect.blockLookup(block, -1);
+                        player.sendMessage(prefix.append(Component.text("No results were found.").color(NamedTextColor.WHITE)));
                     }
-
-                    if (!plugin.al.isAdmin(player))
+                    else
                     {
-                        cooldown.put(player.getName(), System.currentTimeMillis());
+                        showPageToPlayer(player, results, 1);
                     }
-
-                    if (lookup != null)
-                    {
-                        if (lookup.isEmpty())
-                        {
-                            player.sendMessage(net.md_5.bungee.api.ChatColor.of("#30ade4") + "Block Inspector " + ChatColor.WHITE + "- " + "No block data found for this location");
-                            return;
-                        }
-
-                        HISTORY_MAP.remove(event.getPlayer());
-                        HISTORY_MAP.put(event.getPlayer(), new FUtil.PaginationList<>(10));
-                        FUtil.PaginationList<String> paged = HISTORY_MAP.get(event.getPlayer());
-
-                        player.sendMessage("---- " + net.md_5.bungee.api.ChatColor.of("#30ade4") + "Block Inspector" + ChatColor.WHITE + " ---- " +
-                                ChatColor.GRAY + "(x" + block.getX() + "/" + "y" + block.getY() + "/" + "z" + block.getZ() + ")");
-
-                        for (String[] value : lookup)
-                        {
-                            CoreProtectAPI.ParseResult result = coreProtect.parseResult(value);
-                            BlockData bl = result.getBlockData();
-
-                            String s;
-                            String st = "";
-
-                            if (result.getActionString().equals("Placement"))
-                            {
-                                s = " placed ";
-                            }
-                            else if (result.getActionString().equals("Removal"))
-                            {
-                                s = " broke ";
-                            }
-                            else
-                            {
-                                s = " interacted with ";
-                            }
-
-                            if (result.isRolledBack())
-                            {
-                                st += "§m";
-                            }
-
-                            int time = (int)(System.currentTimeMillis() / 1000L);
-
-                            paged.add(ChatColor.GRAY + getTimeAgo(result.getTime(), time) + ChatColor.WHITE + " - " + net.md_5.bungee.api.ChatColor.of("#30ade4") +
-                                    st + result.getPlayer() + ChatColor.WHITE + st + s + net.md_5.bungee.api.ChatColor.of("#30ade4") + st + bl.getMaterial().toString().toLowerCase());
-                        }
-
-                        List<String> page = paged.getPage(1);
-                        for (String entries : page)
-                        {
-                            player.sendMessage(entries);
-                        }
-
-                        player.sendMessage("Page 1/" + paged.getPageCount() + " | To index through the pages, type " + net.md_5.bungee.api.ChatColor.of("#30ade4") + "/ins history <page>");
-                    }
-                }
+                });
             }
         }
     }
