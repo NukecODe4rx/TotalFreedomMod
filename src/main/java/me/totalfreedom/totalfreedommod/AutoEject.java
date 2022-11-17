@@ -91,7 +91,7 @@ public class AutoEject extends FreedomService
             }
             case STRIKE_THREE:
             {
-                plugin.bm.addBan(Ban.forPlayerFuzzy(player, Bukkit.getConsoleSender(), null, kickMessage));
+                plugin.bm.addBan(Ban.forPlayer(player, Bukkit.getConsoleSender(), null, kickMessage));
 
                 FUtil.bcastMsg(ChatColor.RED + player.getName() + " has been banned.");
 

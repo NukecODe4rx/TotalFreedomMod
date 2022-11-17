@@ -4,22 +4,17 @@ import com.earth2me.essentials.utils.DateUtil;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -91,34 +86,12 @@ public class FUtil
             ChatColor.DARK_PURPLE,
             ChatColor.LIGHT_PURPLE);
     private static final SplittableRandom RANDOM = new SplittableRandom();
-    private static final String CHARACTER_STRING = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private static final Map<Integer, String> TIMEZONE_LOOKUP = new HashMap<>();
     public static String DATE_STORAGE_FORMAT = "EEE, d MMM yyyy HH:mm:ss Z";
+    private static final List<String> regxList = Arrays.asList("y", "mo", "w", "d", "h", "m", "s");
 
     static
     {
-        for (ChatColor chatColor : CHAT_COLOR_POOL)
-        {
-            CHAT_COLOR_NAMES.put(chatColor.name().toLowerCase().replace("_", ""), chatColor);
-        }
-
-        for (int i = -12; i <= 12; i++)
-        {
-            String sec = String.valueOf(i).replace("-", "");
-            if (i > -10 && i < 10)
-            {
-                sec = "0" + sec;
-            }
-            if (i >= 0)
-            {
-                sec = "+" + sec;
-            }
-            else
-            {
-                sec = "-" + sec;
-            }
-            TIMEZONE_LOOKUP.put(i, "GMT" + sec + ":00");
-        }
+        CHAT_COLOR_POOL.forEach(color -> CHAT_COLOR_NAMES.put(color.name().toLowerCase().replace("_", ""), color));
     }
 
     public static void cancel(BukkitTask task)
@@ -139,7 +112,9 @@ public class FUtil
 
     public static boolean isExecutive(String name)
     {
-        return ConfigEntry.SERVER_OWNERS.getStringList().contains(name) || ConfigEntry.SERVER_EXECUTIVES.getStringList().contains(name) || ConfigEntry.SERVER_ASSISTANT_EXECUTIVES.getStringList().contains(name);
+        return ConfigEntry.SERVER_OWNERS.getStringList().contains(name)
+                || ConfigEntry.SERVER_EXECUTIVES.getStringList().contains(name)
+                || ConfigEntry.SERVER_ASSISTANT_EXECUTIVES.getStringList().contains(name);
     }
 
     public static boolean isDeveloper(Player player)
@@ -171,15 +146,8 @@ public class FUtil
 
     public static List<String> getPlayerList()
     {
-        List<String> names = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers())
-        {
-            if (!TotalFreedomMod.getPlugin().al.isVanished(player.getName()))
-            {
-                names.add(player.getName());
-            }
-        }
-        return names;
+        return getServer().getOnlinePlayers().stream().filter(player ->
+                !TotalFreedomMod.getPlugin().al.isVanished(player.getUniqueId())).map(HumanEntity::getName).toList();
     }
 
     public static String listToString(List<String> list)
@@ -231,58 +199,6 @@ public class FUtil
         {
             return new ArrayList<>();
         }
-    }
-
-    public static List<String> getAllMaterialNames()
-    {
-        List<String> names = new ArrayList<>();
-        for (Material material : Material.values())
-        {
-            names.add(material.name());
-        }
-        return names;
-    }
-
-    public static Response sendRequest(String endpoint, String method, List<String> headers, String body) throws IOException
-    {
-        URL url = new URL(endpoint);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-        connection.setRequestMethod(method);
-
-        if (headers != null)
-        {
-
-            for (String header : headers)
-            {
-                String[] kv = header.split(":");
-                connection.setRequestProperty(kv[0], kv[1]);
-            }
-        }
-
-        FLog.info(connection.getRequestMethod());
-
-        if (body != null)
-        {
-            connection.setDoOutput(true);
-            DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
-            outputStream.writeBytes(body);
-            outputStream.flush();
-            outputStream.close();
-        }
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-
-        while ((inputLine = in.readLine()) != null)
-        {
-            response.append(inputLine);
-        }
-
-        in.close();
-
-        return new Response(connection.getResponseCode(), response.toString());
     }
 
     public static void bcastMsg(String message, ChatColor color)
@@ -365,17 +281,6 @@ public class FUtil
         }
     }
 
-    private static final List<String> regxList = new ArrayList<String>()
-    {{
-        add("y");
-        add("mo");
-        add("w");
-        add("d");
-        add("h");
-        add("m");
-        add("s");
-    }};
-
     private static long a(String parse)
     {
         StringBuilder sb = new StringBuilder();
@@ -447,16 +352,6 @@ public class FUtil
         return FUtil.getUnixTime(Date.from(instant));
     }
 
-    public static String playerListToNames(Set<OfflinePlayer> players)
-    {
-        List<String> names = new ArrayList<>();
-        for (OfflinePlayer player : players)
-        {
-            names.add(player.getName());
-        }
-        return StringUtils.join(names, ", ");
-    }
-
     public static String dateToString(Date date)
     {
         return new SimpleDateFormat(DATE_STORAGE_FORMAT, Locale.ENGLISH).format(date);
@@ -515,17 +410,6 @@ public class FUtil
         }
 
         return match;
-    }
-
-    public static String getFuzzyIp(String ip)
-    {
-        final String[] ipParts = ip.split("\\.");
-        if (ipParts.length == 4)
-        {
-            return String.format("%s.%s.*.*", ipParts[0], ipParts[1]);
-        }
-
-        return ip;
     }
 
     public static ChatColor randomChatColor()
@@ -593,31 +477,10 @@ public class FUtil
         return date.getTime();
     }
 
-    public static String getNMSVersion()
-    {
-        String packageName = getServer().getClass().getPackage().getName();
-        return packageName.substring(packageName.lastIndexOf('.') + 1);
-    }
-
     public static int randomInteger(int min, int max)
     {
         int range = max - min + 1;
         return (int) (Math.random() * range) + min;
-    }
-
-    public static String randomString(int length)
-    {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvxyz0123456789-_=+[]{};:,.<>~";
-        StringBuilder randomString = new StringBuilder();
-        for (int i = 0; i < length; i++)
-        {
-            int selectedCharacter = randomInteger(1, characters.length()) - 1;
-
-            randomString.append(characters.charAt(selectedCharacter));
-        }
-
-        return randomString.toString();
-
     }
 
     public static String randomAlphanumericString(int length)
@@ -650,76 +513,8 @@ public class FUtil
 
     public static void fixCommandVoid(Player player)
     {
-        for (Player p : Bukkit.getOnlinePlayers())
-        {
-            for (Entity passengerEntity : p.getPassengers())
-            {
-                if (passengerEntity == player)
-                {
-                    p.removePassenger(passengerEntity);
-                }
-            }
-        }
-    }
-
-    public static char getRandomCharacter()
-    {
-        return CHARACTER_STRING.charAt(new SplittableRandom().nextInt(CHARACTER_STRING.length()));
-    }
-
-    public static void give(Player player, Material material, String coloredName, int amount, String... lore)
-    {
-        ItemStack stack = new ItemStack(material, amount);
-        ItemMeta meta = stack.getItemMeta();
-        assert meta != null;
-        meta.setDisplayName(FUtil.colorize(coloredName));
-        List<String> loreList = new ArrayList<>();
-        for (String entry : lore)
-        {
-            loreList.add(FUtil.colorize(entry));
-        }
-        meta.setLore(loreList);
-        stack.setItemMeta(meta);
-        player.getInventory().setItem(player.getInventory().firstEmpty(), stack);
-    }
-
-    public static Player getRandomPlayer()
-    {
-        List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
-        return players.get(randomInteger(0, players.size() - 1));
-    }
-
-    // convert the current time
-    public static int getTimeInTicks(int tz)
-    {
-        if (timeZoneOutOfBounds(tz))
-        {
-            return -1;
-        }
-        Calendar date = Calendar.getInstance(TimeZone.getTimeZone(TIMEZONE_LOOKUP.get(tz)));
-        int res = 0;
-        for (int i = 0; i < date.get(Calendar.HOUR_OF_DAY) - 6; i++) // oh yeah i don't know why this is 6 hours ahead
-        {
-            res += 1000;
-        }
-        int addExtra = 0; // we're adding extra to account for repeating decimals
-        for (int i = 0; i < date.get(Calendar.MINUTE); i++)
-        {
-            res += 16;
-            addExtra++;
-            if (addExtra == 3)
-            {
-                res += 1;
-                addExtra = 0;
-            }
-        }
-        // this is the best it can be. trust me.
-        return res;
-    }
-
-    public static boolean timeZoneOutOfBounds(int tz)
-    {
-        return tz < -12 || tz > 12;
+        Bukkit.getOnlinePlayers().forEach(pl ->
+                pl.getPassengers().stream().filter(entity -> entity == player).forEach(player::removePassenger));
     }
 
     public static String getIp(Player player)
@@ -805,17 +600,10 @@ public class FUtil
         }.runTaskLater(TotalFreedomMod.getPlugin(), delay);
     }
 
-    public static int getFakePlayerCount()
+    public static long getFakePlayerCount()
     {
-        int i = TotalFreedomMod.getPlugin().al.vanished.size();
-        for (String name : TotalFreedomMod.getPlugin().al.vanished)
-        {
-            if (Bukkit.getPlayer(name) == null)
-            {
-                i--;
-            }
-        }
-        return getServer().getOnlinePlayers().size() - i;
+        return getServer().getOnlinePlayers().stream().filter(player ->
+                !TotalFreedomMod.getPlugin().al.isVanished(player.getUniqueId())).count();
     }
 
     public static double getMeanAverageDouble(double[] doubles)

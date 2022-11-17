@@ -69,21 +69,6 @@ public class FSync
         }.runTask(plugin);
     }
 
-    public static void autoEject(final Player player, final String kickMessage)
-    {
-        final TotalFreedomMod plugin = TotalFreedomMod.getPlugin();
-        new BukkitRunnable()
-        {
-
-            @Override
-            public void run()
-            {
-                plugin.ae.autoEject(player, kickMessage);
-            }
-
-        }.runTask(plugin);
-    }
-
     public static void bcastMsg(final String message, final ChatColor color)
     {
         final TotalFreedomMod plugin = TotalFreedomMod.getPlugin();

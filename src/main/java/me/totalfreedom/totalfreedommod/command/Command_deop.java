@@ -32,16 +32,14 @@ public class Command_deop extends FreedomCommand
         final List<String> matchedPlayerNames = new ArrayList<>();
         for (Player player : server.getOnlinePlayers())
         {
-            if (player.getName().toLowerCase().contains(targetName) || player.getDisplayName().toLowerCase().contains(targetName)
-                    || player.getName().contains(targetName) || player.getDisplayName().contains(targetName))
+            if ((player.getName().toLowerCase().contains(targetName) || player.getDisplayName().toLowerCase().contains(targetName)
+                    || player.getName().contains(targetName) || player.getDisplayName().contains(targetName)) &&
+                    player.isOp() && !plugin.al.isVanished(player.getUniqueId()))
             {
-                if (player.isOp() && !plugin.al.isVanished(player.getName()))
-                {
-                    matchedPlayerNames.add(player.getName());
-                    player.setOp(false);
-                    msg(player, YOU_ARE_NOT_OP);
-                    plugin.rm.updateDisplay(player);
-                }
+                matchedPlayerNames.add(player.getName());
+                player.setOp(false);
+                msg(player, YOU_ARE_NOT_OP);
+                plugin.rm.updateDisplay(player);
             }
         }
 

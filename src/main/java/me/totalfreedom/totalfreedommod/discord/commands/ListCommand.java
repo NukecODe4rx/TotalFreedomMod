@@ -73,25 +73,20 @@ public class ListCommand extends DiscordCommandImpl
 
         Map<Displayable, List<String>> displayables = new HashMap<>();
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+        Bukkit.getOnlinePlayers().stream().filter(player -> !adminList.isVanished(player.getUniqueId())).forEach(player ->
         {
-            if (adminList.isVanished(onlinePlayer.getName()))
-            {
-                continue;
-            }
-
-
-            Displayable displayable = rankManager.getDisplay(onlinePlayer);
+            final Displayable displayable = rankManager.getDisplay(player);
+            final String name = Discord.deformat(player.getName());
 
             if (displayables.containsKey(displayable))
             {
-                displayables.get(displayable).add(onlinePlayer.getName());
+                displayables.get(displayable).add(name);
             }
             else
             {
                 displayables.put(displayable, new ArrayList<>(List.of(onlinePlayer.getName())));
             }
-        }
+        });
 
         for (Map.Entry<Displayable, List<String>> entry : displayables.entrySet())
         {

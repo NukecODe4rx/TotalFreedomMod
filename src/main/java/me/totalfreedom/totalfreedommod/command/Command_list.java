@@ -65,9 +65,9 @@ public class Command_list extends FreedomCommand
                     + " out of a maximum " + ChatColor.RED + server.getMaxPlayers() + ChatColor.BLUE + " players online.";
 
             players = server.getOnlinePlayers().stream().filter(pl ->
-                    (listFilter == ListFilter.ADMINS && plugin.al.isAdmin(pl) && !plugin.al.isVanished(pl.getName()))
-                    || (listFilter == ListFilter.VANISHED_ADMINS && plugin.al.isVanished(pl.getName()))
-                    || (listFilter == ListFilter.PLAYERS && !plugin.al.isVanished(pl.getName()))).map(player ->
+                    (listFilter == ListFilter.ADMINS && plugin.al.isAdmin(pl) && !plugin.al.isVanished(pl.getUniqueId()))
+                    || (listFilter == ListFilter.VANISHED_ADMINS && plugin.al.isVanished(pl.getUniqueId()))
+                    || (listFilter == ListFilter.PLAYERS && !plugin.al.isVanished(pl.getUniqueId()))).map(player ->
                     plugin.rm.getDisplay(player).getColoredTag() + player.getName()).toList();
         }
 

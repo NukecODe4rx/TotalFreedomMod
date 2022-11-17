@@ -21,7 +21,7 @@ import org.bukkit.entity.Player;
 @CommandParameters(description = "Place a cage around someone with certain blocks, or someone's player head.", usage = "/<command> <purge | <partialname> [head | block] [playername | blockname]")
 public class Command_cage extends FreedomCommand
 {
-
+    @Override
     public boolean run(final CommandSender sender, final Player playerSender, final Command cmd, final String commandLabel, final String[] args, final boolean senderIsConsole)
     {
         if (args.length == 0)
@@ -33,11 +33,8 @@ public class Command_cage extends FreedomCommand
         if (args[0].equalsIgnoreCase("purge"))
         {
             FUtil.adminAction(sender.getName(), "Uncaging all players", true);
-            for (Player player : server.getOnlinePlayers())
-            {
-                final FPlayer fPlayer = plugin.pl.getPlayer(player);
-                fPlayer.getCageData().setCaged(false);
-            }
+            server.getOnlinePlayers().stream().map(player -> plugin.pl.getPlayer(player)).forEach(fPlayer ->
+                    fPlayer.getCageData().setCaged(false));
             return true;
         }
 
@@ -62,7 +59,7 @@ public class Command_cage extends FreedomCommand
             final String s = args[1];
             switch (s)
             {
-                case "head":
+                case "head" ->
                 {
                     outerMaterial = Material.PLAYER_HEAD;
                     if (args.length >= 3)
@@ -73,9 +70,8 @@ public class Command_cage extends FreedomCommand
                     {
                         outerMaterial = Material.SKELETON_SKULL;
                     }
-                    break;
                 }
-                case "block":
+                case "block" ->
                 {
                     if (args.length >= 3)
                     {
@@ -85,7 +81,6 @@ public class Command_cage extends FreedomCommand
                         if (Material.matchMaterial(args[2]) != null && Material.matchMaterial(args[2]).isBlock())
                         {
                             outerMaterial = Material.matchMaterial(args[2]);
-                            break;
                         }
                         else
                         {
@@ -98,7 +93,7 @@ public class Command_cage extends FreedomCommand
                         return false;
                     }
                 }
-                default:
+                default ->
                 {
                     return false;
                 }
@@ -156,7 +151,7 @@ public class Command_cage extends FreedomCommand
         {
             if (args[1].equals("block"))
             {
-                return FUtil.getAllMaterialNames();
+                return Arrays.stream(Material.values()).map(Enum::name).toList();
             }
             else if (args[1].equals("head"))
             {

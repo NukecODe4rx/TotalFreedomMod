@@ -121,17 +121,6 @@ public class Ban
                 reason);
     }
 
-    public static Ban forPlayerFuzzy(Player player, CommandSender by, Date expiry, String reason)
-    {
-        return new Ban(player.getName(),
-                player.getUniqueId(),
-                FUtil.getFuzzyIp(FUtil.getIp(player)),
-                by.getName(),
-                Date.from(Instant.now()),
-                expiry,
-                reason);
-    }
-
     public static SimpleDateFormat getDateFormat()
     {
         return DATE_FORMAT;

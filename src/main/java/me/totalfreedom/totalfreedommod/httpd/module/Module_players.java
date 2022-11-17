@@ -1,89 +1,59 @@
 package me.totalfreedom.totalfreedommod.httpd.module;
 
-import me.totalfreedom.totalfreedommod.admin.Admin;
+import com.google.gson.Gson;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.httpd.NanoHTTPD;
 import me.totalfreedom.totalfreedommod.util.FUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.HumanEntity;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class Module_players extends HTTPDModule
-{
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+public class Module_players extends HTTPDModule
+{   
+    private static final Gson gson = new Gson();
+    
     public Module_players(NanoHTTPD.HTTPSession session)
     {
         super(session);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public NanoHTTPD.Response getResponse()
     {
-        final JSONObject responseObject = new JSONObject();
+        final Map<String, List<String>> responseMap = new HashMap<>();
 
-        final JSONArray players = new JSONArray();
-        final JSONArray onlineadmins = new JSONArray(); // updated, never queried.
-        final JSONArray masterbuilders = new JSONArray();
-        final JSONArray admins = new JSONArray();
-        final JSONArray senioradmins = new JSONArray();
-        final JSONArray developers = new JSONArray();
-        final JSONArray executives = new JSONArray();
+        final List<String> admins = new ArrayList<>();
+        final List<String> senioradmins = new ArrayList<>();
 
-        // All online players
-        for (Player player : Bukkit.getOnlinePlayers())
+        plugin.al.getActiveAdmins().stream().filter(admin -> admin.getName() != null).forEach(admin ->
         {
-            if (!plugin.al.isVanished(player.getName()))
-            {
-                players.add(player.getName());
-                if (plugin.al.isAdmin(player))
-                {
-                    onlineadmins.add(player.getName());
-                }
-            }
-        }
-
-        // Admins
-        for (Admin admin : plugin.al.getActiveAdmins())
-        {
-            final String username = admin.getName();
             switch (admin.getRank())
             {
-                case ADMIN:
+                case ADMIN -> admins.add(admin.getName());
+                case SENIOR_ADMIN -> senioradmins.add(admin.getName());
+                default ->
                 {
-                    admins.add(username);
-                    break;
-                }
-                case SENIOR_ADMIN:
-                {
-                    senioradmins.add(username);
-                    break;
-                }
-                default:
-                {
-                    // Do nothing
-                    break;
+                    // Do nothing, keeps Codacy quiet
                 }
             }
-        }
+        });
 
-        masterbuilders.addAll(plugin.pl.getMasterBuilderNames());
+        responseMap.put("players", server.getOnlinePlayers().stream().filter(player ->
+                !plugin.al.isVanished(player.getUniqueId())).map(HumanEntity::getName).toList());
+        responseMap.put("masterbuilders", plugin.pl.getMasterBuilderNames());
+        responseMap.put("admins", admins);
+        responseMap.put("senioradmins", senioradmins);
+        responseMap.put("developers", FUtil.DEVELOPER_NAMES);
+        responseMap.put("assistantexecutives", ConfigEntry.SERVER_ASSISTANT_EXECUTIVES.getStringList());
+        responseMap.put("executives", ConfigEntry.SERVER_EXECUTIVES.getStringList());
 
-        // Developers
-        developers.addAll(FUtil.DEVELOPER_NAMES);
-
-        // Executives
-        executives.addAll(ConfigEntry.SERVER_EXECUTIVES.getList());
-
-        responseObject.put("players", players);
-        responseObject.put("masterbuilders", masterbuilders);
-        responseObject.put("admins", admins);
-        responseObject.put("senioradmins", senioradmins);
-        responseObject.put("developers", developers);
-        responseObject.put("executives", executives);
-
-        final NanoHTTPD.Response response = new NanoHTTPD.Response(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_JSON, responseObject.toString());
+        final NanoHTTPD.Response response = new NanoHTTPD.Response(NanoHTTPD.Response.Status.OK, NanoHTTPD.MIME_JSON,
+                gson.toJson(responseMap));
         response.addHeader("Access-Control-Allow-Origin", "*");
         return response;
     }

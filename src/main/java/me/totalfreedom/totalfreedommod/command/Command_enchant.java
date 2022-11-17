@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
+
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import org.bukkit.ChatColor;
@@ -19,18 +21,6 @@ import org.bukkit.inventory.ItemStack;
 @CommandParameters(description = "Enchant items.", usage = "/<command> <list | addall | reset | add <name> [level] | remove <name>>")
 public class Command_enchant extends FreedomCommand
 {
-
-    public static List<String> stringNumberRange(int min, int max)
-    {
-        List<String> range = new ArrayList<>();
-        for (int i = min; i <= max; i++)
-        {
-            range.add(String.valueOf(i));
-        }
-
-        return range;
-    }
-
     @SuppressWarnings("deprecation")
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
@@ -73,30 +63,23 @@ public class Command_enchant extends FreedomCommand
         }
         else if (args[0].equalsIgnoreCase("addall"))
         {
-            for (Enchantment ench : Enchantment.values())
+            Arrays.stream(Enchantment.values()).filter(enchantment -> enchantment.canEnchantItem(item)).forEach(ench ->
             {
                 try
                 {
-                    if (ench.canEnchantItem(item))
-                    {
-                        item.addEnchantment(ench, ench.getMaxLevel());
-                    }
+                    item.addEnchantment(ench, ench.getMaxLevel());
                 }
                 catch (Exception ex)
                 {
                     msg("Could not add enchantment: " + ench.getName());
                 }
-            }
+            });
 
             msg("Added all possible enchantments for this item.");
         }
         else if (args[0].equalsIgnoreCase("reset"))
         {
-            for (Enchantment ench : item.getEnchantments().keySet())
-            {
-                item.removeEnchantment(ench);
-            }
-
+            item.getEnchantments().keySet().forEach(item::removeEnchantment);
             msg("Removed all enchantments.");
         }
         else
@@ -251,21 +234,18 @@ public class Command_enchant extends FreedomCommand
                 return getEnchantments(item);
             }
         }
-        else if (args.length == 3)
+        else if (args.length == 3 && args[0].equals("add"))
         {
-            if (args[0].equals("add"))
+            Enchantment enchantment = Enchantment.getByName(args[1].toUpperCase());
+            if (enchantment != null)
             {
-                Enchantment enchantment = Enchantment.getByName(args[1].toUpperCase());
-                if (enchantment != null)
+                if (!unsafe)
                 {
-                    if (!unsafe)
-                    {
-                        return stringNumberRange(1, enchantment.getMaxLevel());
-                    }
-                    else
-                    {
-                        return Collections.singletonList("[level]");
-                    }
+                    return IntStream.rangeClosed(1, enchantment.getMaxLevel()).mapToObj(String::valueOf).toList();
+                }
+                else
+                {
+                    return Collections.singletonList("[level]");
                 }
             }
         }

@@ -84,7 +84,7 @@ public class SQLite extends FreedomService
             {
                 try
                 {
-                    connection.createStatement().execute("CREATE TABLE `admins` (`uuid` VARCHAR NOT NULL, `ips` VARCHAR NOT NULL, `rank` VARCHAR NOT NULL, `active` BOOLEAN NOT NULL, `last_login` LONG NOT NULL, `command_spy` BOOLEAN NOT NULL, `potion_spy` BOOLEAN NOT NULL, `ac_format` VARCHAR, `ptero_id` VARCHAR);");
+                    connection.createStatement().execute("CREATE TABLE `admins` (`uuid` VARCHAR NOT NULL, `ips` VARCHAR NOT NULL, `rank` VARCHAR NOT NULL, `active` BOOLEAN NOT NULL, `last_login` LONG NOT NULL, `command_spy` BOOLEAN NOT NULL, `potion_spy` BOOLEAN NOT NULL, `ac_format` VARCHAR);");
                 }
                 catch (SQLException e)
                 {
@@ -219,7 +219,7 @@ public class SQLite extends FreedomService
     {
         try
         {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO admins VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO admins VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             statement.setString(1, admin.getUuid().toString());
             statement.setString(2, FUtil.listToString(admin.getIps()));
             statement.setString(3, admin.getRank().toString());
@@ -228,7 +228,6 @@ public class SQLite extends FreedomService
             statement.setBoolean(6, admin.getCommandSpy());
             statement.setBoolean(7, admin.getPotionSpy());
             statement.setString(8, admin.getAcFormat());
-            statement.setString(9, admin.getPteroID());
             statement.executeUpdate();
         }
         catch (SQLException e)

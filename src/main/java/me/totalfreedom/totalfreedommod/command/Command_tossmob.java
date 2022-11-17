@@ -1,7 +1,5 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
@@ -21,17 +19,6 @@ import org.bukkit.inventory.ItemStack;
         usage = "/<command> <mobtype [speed] | off | list>")
 public class Command_tossmob extends FreedomCommand
 {
-
-    public static List<String> getAllMobNames()
-    {
-        List<String> names = new ArrayList<>();
-        for (EntityType entityType : Groups.MOB_TYPES)
-        {
-            names.add(entityType.name());
-        }
-        return names;
-    }
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
@@ -58,7 +45,7 @@ public class Command_tossmob extends FreedomCommand
 
         if (args[0].equalsIgnoreCase("list"))
         {
-            msg("Supported mobs: " + getAllMobNames(), ChatColor.GREEN);
+            msg("Supported mobs: " + Groups.MOB_TYPES.stream().map(Enum::name).toList(), ChatColor.GREEN);
             return true;
         }
 

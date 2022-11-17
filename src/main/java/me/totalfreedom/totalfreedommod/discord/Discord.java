@@ -232,32 +232,6 @@ public class Discord extends FreedomService
         messageChatChannel("**Message queue cleared**", true);
     }
 
-    public void sendPteroInfo(PlayerData playerData, String username, String password)
-    {
-        User user = getUser(playerData.getDiscordID());
-        String message = "The following are your Pterodactyl details:\n\nUsername: " + username + "\nPassword: " + password + "\n\nYou can connect to the panel at " + plugin.ptero.URL;
-        PrivateChannel privateChannel = user.openPrivateChannel().complete();
-        privateChannel.sendMessage(message).complete();
-    }
-
-    public User getUser(String id)
-    {
-        Guild guild = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        if (guild == null)
-        {
-            FLog.severe("Either the bot is not in the Discord server or it doesn't exist. Check the server ID.");
-            return null;
-        }
-
-        Member member = guild.getMemberById(id);
-        if (member == null)
-        {
-            return null;
-        }
-
-        return member.getUser();
-    }
-
     public String generateCode(int size)
     {
         return RandomStringUtils.randomNumeric(size);
@@ -290,7 +264,7 @@ public class Discord extends FreedomService
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event)
     {
-        if (!plugin.al.isVanished(event.getPlayer().getName()))
+        if (!plugin.al.isVanished(event.getPlayer().getUniqueId()))
         {
             messageChatChannel("**" + event.getPlayer().getName() + " joined the server" + "**", true);
         }
@@ -299,7 +273,7 @@ public class Discord extends FreedomService
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLeave(PlayerQuitEvent event)
     {
-        if (!plugin.al.isVanished(event.getPlayer().getName()))
+        if (!plugin.al.isVanished(event.getPlayer().getUniqueId()))
         {
             messageChatChannel("**" + event.getPlayer().getName() + " left the server" + "**", true);
         }

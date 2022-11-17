@@ -10,52 +10,41 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class AntiSpam extends FreedomService
 {
-
+    private ScheduledThreadPoolExecutor cycle;
     public static final int MSG_PER_CYCLE = 8;
-    public static final int TICKS_PER_CYCLE = 2 * 10;
     //
-    public BukkitTask cycleTask = null;
     private Map<Player, Integer> muteCounts = new HashMap<>();
 
     @Override
     public void onStart()
     {
-        new BukkitRunnable()
-        {
-
-            @Override
-            public void run()
-            {
-                cycle();
-            }
-        }.runTaskTimer(plugin, TICKS_PER_CYCLE, TICKS_PER_CYCLE);
+        cycle = new ScheduledThreadPoolExecutor(1);
+        cycle.scheduleAtFixedRate(this::cycle, 0, 1, TimeUnit.SECONDS);
     }
 
     @Override
     public void onStop()
     {
-        FUtil.cancel(cycleTask);
+        cycle.shutdownNow();
     }
 
     private void cycle()
     {
-        for (Player player : server.getOnlinePlayers())
+        server.getOnlinePlayers().stream().map(player -> plugin.pl.getPlayer(player)).forEach(fPlayer ->
         {
-            final FPlayer playerdata = plugin.pl.getPlayer(player);
-
             // TODO: Move each to their own section
-            playerdata.resetMsgCount();
-            playerdata.resetBlockDestroyCount();
-            playerdata.resetBlockPlaceCount();
-        }
+            fPlayer.resetMsgCount();
+            fPlayer.resetBlockDestroyCount();
+            fPlayer.resetBlockPlaceCount();
+        });
     }
 
     @EventHandler(priority = EventPriority.LOW)
