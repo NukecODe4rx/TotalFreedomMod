@@ -4,6 +4,8 @@ import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import me.totalfreedom.totalfreedommod.util.FSync;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
@@ -42,7 +44,7 @@ public class Muter extends FreedomService
             return;
         }
 
-        FSync.playerMsg(event.getPlayer(), ChatColor.RED + "You are muted.");
+        player.sendMessage(Component.text("You are muted.", NamedTextColor.RED));
         event.setCancelled(true);
     }
 
@@ -80,7 +82,7 @@ public class Muter extends FreedomService
 
         if (ConfigEntry.MUTED_BLOCKED_COMMANDS.getStringList().contains(cmdName))
         {
-            player.sendMessage(ChatColor.RED + "That command is blocked while you are muted.");
+            player.sendMessage(Component.text("That command is blocked while you are muted.", NamedTextColor.RED));
             event.setCancelled(true);
             return;
         }

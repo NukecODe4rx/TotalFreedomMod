@@ -3,15 +3,15 @@ package me.totalfreedom.totalfreedommod.command;
 import me.totalfreedom.totalfreedommod.GameRuleHandler;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.rank.Rank;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @CommandPermissions(level = Rank.ADMIN, source = SourceType.BOTH)
-@CommandParameters(description = "Control mob limiting parameters.", usage = "/<command> <on|off|setmax <count>|dragon|giant|ghast|slime>")
+@CommandParameters(description = "Control mob limiting parameters.", usage = "/<command> <on | off | setmax <count> | dragon | giant | ghast | slime>")
 public class Command_moblimiter extends FreedomCommand
 {
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
@@ -20,45 +20,29 @@ public class Command_moblimiter extends FreedomCommand
             return false;
         }
 
-        if (args[0].equalsIgnoreCase("on"))
+        switch (args[0].toLowerCase())
         {
-            ConfigEntry.MOB_LIMITER_ENABLED.setBoolean(true);
-        }
-        else if (args[0].equalsIgnoreCase("off"))
-        {
-            ConfigEntry.MOB_LIMITER_ENABLED.setBoolean(false);
-        }
-        else if (args[0].equalsIgnoreCase("dragon"))
-        {
-            ConfigEntry.MOB_LIMITER_DISABLE_DRAGON.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_DRAGON.getBoolean());
-        }
-        else if (args[0].equalsIgnoreCase("giant"))
-        {
-            ConfigEntry.MOB_LIMITER_DISABLE_GIANT.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_GIANT.getBoolean());
-        }
-        else if (args[0].equalsIgnoreCase("slime"))
-        {
-            ConfigEntry.MOB_LIMITER_DISABLE_SLIME.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_SLIME.getBoolean());
-        }
-        else if (args[0].equalsIgnoreCase("ghast"))
-        {
-            ConfigEntry.MOB_LIMITER_DISABLE_GHAST.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_GHAST.getBoolean());
-        }
-        else
-        {
-            if (args.length < 2)
+            case "on" -> ConfigEntry.MOB_LIMITER_ENABLED.setBoolean(true);
+            case "off" -> ConfigEntry.MOB_LIMITER_ENABLED.setBoolean(false);
+            case "dragon" -> ConfigEntry.MOB_LIMITER_DISABLE_DRAGON.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_DRAGON.getBoolean());
+            case "giant" -> ConfigEntry.MOB_LIMITER_DISABLE_GIANT.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_GIANT.getBoolean());
+            case "slime" -> ConfigEntry.MOB_LIMITER_DISABLE_SLIME.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_SLIME.getBoolean());
+            case "ghast" -> ConfigEntry.MOB_LIMITER_DISABLE_GHAST.setBoolean(!ConfigEntry.MOB_LIMITER_DISABLE_GHAST.getBoolean());
+            case "setmax" ->
             {
-                return false;
-            }
+                if (args.length < 2)
+                {
+                    return false;
+                }
 
-            if (args[0].equalsIgnoreCase("setmax"))
-            {
                 try
                 {
                     ConfigEntry.MOB_LIMITER_MAX.setInteger(Math.max(0, Math.min(2000, Integer.parseInt(args[1]))));
                 }
-                catch (NumberFormatException ignored)
+                catch (Exception ex)
                 {
+                    msg("Invalid number: " + args[1], ChatColor.RED);
+                    return true;
                 }
             }
         }
@@ -78,7 +62,6 @@ public class Command_moblimiter extends FreedomCommand
         }
 
         plugin.gr.setGameRule(GameRuleHandler.GameRule.DO_MOB_SPAWNING, !ConfigEntry.MOB_LIMITER_ENABLED.getBoolean());
-
         return true;
     }
 }
