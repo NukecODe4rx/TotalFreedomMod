@@ -68,7 +68,6 @@ public class TotalFreedomMod extends JavaPlugin
     public CommandLoader cl;
     // Services
     public WorldManager wm;
-    public LogViewer lv;
     public AdminList al;
     public ActivityLog acl;
     public RankManager rm;
@@ -228,7 +227,6 @@ public class TotalFreedomMod extends JavaPlugin
         {
             // Start services
             wm = new WorldManager();
-            lv = new LogViewer();
             sql = new SQLite();
             al = new AdminList();
             acl = new ActivityLog();
