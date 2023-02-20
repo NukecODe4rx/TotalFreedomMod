@@ -18,8 +18,8 @@ public class Command_toggle extends FreedomCommand
 {
     private final List<String> toggles = Arrays.asList(
             "waterplace", "fireplace", "lavaplace", "fluidspread", "lavadmg", "firespread", "frostwalk",
-            "firework", "prelog", "petprotect", "entitywipe", "nonuke [range] [count]",
-            "explosives [radius]", "unsafeenchs", "bells", "armorstands", "masterblocks", "grindstones",
+            "firework", "prelog", "lockdown", "petprotect", "entitywipe", "nonuke [range] [count]",
+            "explosives [radius]", "unsafeenchs", "bells", "armorstands", "masterblocks", "books", "grindstones",
             "jukeboxes", "spawners", "4chan", "beehives", "respawnanchors", "autotp", "autoclear", "minecarts", "mp44",
             "landmines", "tossmob", "gravity");
 
@@ -188,6 +188,12 @@ public class Command_toggle extends FreedomCommand
             case "masterblocks":
             {
                 toggle("Master blocks are", ConfigEntry.ALLOW_MASTERBLOCKS);
+                break;
+            }
+
+            case "books":
+            {
+                toggle("Books are", ConfigEntry.ALLOW_BOOKS);
                 break;
             }
 

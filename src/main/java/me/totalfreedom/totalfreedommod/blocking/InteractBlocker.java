@@ -176,6 +176,11 @@ public class InteractBlocker extends FreedomService
             }
             case WRITTEN_BOOK:
             {
+                if (ConfigEntry.ALLOW_BOOKS.getBoolean())
+                {
+                    break;
+                }
+
                 player.getInventory().clear(player.getInventory().getHeldItemSlot());
                 player.sendMessage(ChatColor.GRAY + "Books are currently disabled.");
                 event.setCancelled(true);

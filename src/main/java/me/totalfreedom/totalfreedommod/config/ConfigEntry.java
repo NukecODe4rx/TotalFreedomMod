@@ -34,6 +34,7 @@ public enum ConfigEntry
     AUTO_CLEAR(Boolean.class, "allow.auto_clear"),
     ALLOW_GRAVITY(Boolean.class, "allow.gravity"),
     ALLOW_MASTERBLOCKS(Boolean.class, "allow.masterblocks"),
+    ALLOW_BOOKS(Boolean.class, "allow.books"),
     //
     BLOCKED_CHATCODES(String.class, "blocked_chatcodes"),
     //

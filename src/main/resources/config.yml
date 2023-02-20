@@ -217,6 +217,7 @@ allow:
   auto_clear: false
   gravity: false
   masterblocks: false
+  books: true
 
 blocked_commands:
   #
