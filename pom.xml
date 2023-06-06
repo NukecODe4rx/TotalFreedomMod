@@ -160,13 +160,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.papermc</groupId>
-            <artifactId>paperlib</artifactId>
-            <version>1.0.7</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.vexsoftware</groupId>
             <artifactId>votifier</artifactId>
             <version>v1.9</version>
@@ -350,27 +343,10 @@
                             <minimizeJar>true</minimizeJar>
                             <relocations>
                                 <relocation>
-                                    <pattern>io.papermc.lib</pattern>
-                                    <shadedPattern>me.totalfreedom.totalfreedommod.paperlib
-                                    </shadedPattern> <!-- Replace this -->
-                                </relocation>
-                                <relocation>
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>me.totalfreedom.totalfreedommod</shadedPattern>
                                 </relocation>
                             </relocations>
-                            <artifactSet>
-                                <includes>
-                                    <include>commons-io:commons-io</include>
-                                    <include>org.apache.commons:commons-lang3</include>
-                                    <include>org.reflections:reflections</include>
-                                    <include>org.javassist:javassist</include>
-                                    <include>io.papermc:paperlib</include>
-                                    <include>org.bstats:bstats-bukkit</include>
-                                    <include>org.bstats:bstats-base</include>
-                                    <include>org.jetbrains:annotations</include>
-                                </includes>
-                            </artifactSet>
                         </configuration>
                     </execution>
                 </executions>

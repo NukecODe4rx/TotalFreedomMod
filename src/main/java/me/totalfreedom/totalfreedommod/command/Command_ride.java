@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import io.papermc.lib.PaperLib;
 import java.util.HashMap;
 import java.util.Map;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
@@ -56,7 +55,7 @@ public class Command_ride extends FreedomCommand
 
             if (requester.getWorld() != playerSender.getWorld())
             {
-                PaperLib.teleportAsync(requester, playerSender.getLocation());
+                requester.teleportAsync(playerSender.getLocation());
             }
 
             RIDE_REQUESTS.remove(playerSender);
@@ -148,7 +147,7 @@ public class Command_ride extends FreedomCommand
 
         if (player.getWorld() != playerSender.getWorld())
         {
-            PaperLib.teleportAsync(playerSender, player.getLocation());
+            player.teleportAsync(player.getLocation());
         }
 
         player.addPassenger(playerSender);

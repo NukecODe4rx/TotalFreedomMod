@@ -1,7 +1,6 @@
 package me.totalfreedom.totalfreedommod;
 
 import com.google.common.collect.Multimap;
-import io.papermc.lib.PaperLib;
 
 import java.util.Collection;
 import java.util.Map;
@@ -63,7 +62,7 @@ public class MovementValidator extends FreedomService
         if (Math.abs(event.getTo().getX()) >= MAX_XYZ_COORD || Math.abs(event.getTo().getZ()) >= MAX_XYZ_COORD || Math.abs(event.getTo().getY()) >= MAX_XYZ_COORD)
         {
             event.setCancelled(true);
-            PaperLib.teleportAsync(player, player.getWorld().getSpawnLocation());
+            player.teleportAsync(player.getWorld().getSpawnLocation());
         }
 
         if (exploitItem(event.getPlayer().getInventory().getHelmet()))
@@ -112,7 +111,7 @@ public class MovementValidator extends FreedomService
         // Validate position
         if (Math.abs(player.getLocation().getX()) >= MAX_XYZ_COORD || Math.abs(player.getLocation().getZ()) >= MAX_XYZ_COORD || Math.abs(player.getLocation().getY()) >= MAX_XYZ_COORD)
         {
-            PaperLib.teleportAsync(player, player.getWorld().getSpawnLocation()); // Illegal position, teleport to spawn
+            player.teleportAsync(player.getWorld().getSpawnLocation()); // Illegal position, teleport to spawn
         }
     }
 

@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.caging;
 
-import io.papermc.lib.PaperLib;
 import java.util.Objects;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
@@ -72,7 +71,7 @@ public class Cager extends FreedomService
 
         if (outOfCage)
         {
-            PaperLib.teleportAsync(player.getPlayer(), cageLoc.subtract(0, 0.1, 0));
+            player.getPlayer().teleportAsync(cageLoc.subtract(0, 0.1, 0));
             FUtil.playerMsg(player.getPlayer(), "You may not leave your cage.", ChatColor.RED);
             cage.regenerate();
         }
