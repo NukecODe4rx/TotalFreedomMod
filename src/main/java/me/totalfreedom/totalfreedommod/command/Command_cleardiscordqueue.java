@@ -14,7 +14,6 @@ public class Command_cleardiscordqueue extends FreedomCommand
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
         plugin.dc.clearQueue();
-        msg("Cleared the discord message queue.");
         return true;
     }
 }

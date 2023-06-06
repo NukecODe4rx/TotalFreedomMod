@@ -457,6 +457,7 @@ blocked_commands:
     - doom
     - slconfig
     - smite
+    - nickfilter
 
 # Words that cannot be used in tags
 forbidden_words:

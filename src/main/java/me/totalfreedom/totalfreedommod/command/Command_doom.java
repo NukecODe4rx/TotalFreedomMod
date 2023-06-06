@@ -44,21 +44,6 @@ public class Command_doom extends FreedomCommand
 
         final String ip = FUtil.getIp(player);
 
-        // Remove from admin
-        Admin admin = getAdmin(player);
-        if (admin != null)
-        {
-            FUtil.adminAction(sender.getName(), "Removing " + player.getName() + " from the admin list", true);
-            admin.setActive(false);
-            plugin.al.save(admin);
-            plugin.al.updateTables();
-            plugin.ptero.updateAccountStatus(admin);
-            if (plugin.dc.enabled && ConfigEntry.DISCORD_ROLE_SYNC.getBoolean())
-            {
-                Discord.syncRoles(admin, plugin.pl.getData(admin.getName()).getDiscordID());
-            }
-        }
-
         // Remove from whitelist
         player.setWhitelisted(false);
 
