@@ -56,9 +56,6 @@ import org.jetbrains.annotations.NotNull;
 public class TotalFreedomMod extends JavaPlugin
 {
     public static final String CONFIG_FILENAME = "config.yml";
-    //
-    public static final BuildProperties build = new BuildProperties();
-    //
     public static String pluginName;
     public static String pluginVersion;
     private static TotalFreedomMod plugin;
@@ -156,16 +153,12 @@ public class TotalFreedomMod extends JavaPlugin
 
         FLog.setPluginLogger(plugin.getLogger());
         FLog.setServerLogger(getServer().getLogger());
-
-        build.load(plugin);
     }
 
     @Override
     public void onEnable()
     {
         FLog.info("Created by Madgeek1450 and Prozza");
-        FLog.info("Version " + build.version);
-        FLog.info("Compiled " + build.date + " by " + build.author);
 
         final MethodTimer timer = new MethodTimer();
         timer.start();
@@ -223,48 +216,6 @@ public class TotalFreedomMod extends JavaPlugin
     public ChunkGenerator getDefaultWorldGenerator(@NotNull String worldName, String id)
     {
         return new CleanroomChunkGenerator(id);
-    }
-
-    public static class BuildProperties
-    {
-        public String author;
-        public String codename;
-        public String version;
-        public String number;
-        public String date;
-        public String head;
-
-        public void load(TotalFreedomMod plugin)
-        {
-            try
-            {
-                final Properties props;
-
-                try (InputStream in = plugin.getResource("build.properties"))
-                {
-                    props = new Properties();
-                    props.load(in);
-                }
-
-                author = props.getProperty("buildAuthor", "unknown");
-                codename = props.getProperty("buildCodeName", "unknown");
-                version = props.getProperty("buildVersion", pluginVersion);
-                number = props.getProperty("buildNumber", "1");
-                date = props.getProperty("buildDate", "unknown");
-                // Need to do this or it will display ${git.commit.id.abbrev}
-                head = props.getProperty("buildHead", "unknown").replace("${git.commit.id.abbrev}", "unknown");
-            }
-            catch (Exception ex)
-            {
-                FLog.severe("Could not load build properties! Did you compile with NetBeans/Maven?");
-                FLog.severe(ex);
-            }
-        }
-
-        public String formattedVersion()
-        {
-            return pluginVersion + "." + number + " (" + head + ")";
-        }
     }
 
     /**
