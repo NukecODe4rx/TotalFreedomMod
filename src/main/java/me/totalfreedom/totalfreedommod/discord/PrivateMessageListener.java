@@ -3,13 +3,19 @@ package me.totalfreedom.totalfreedommod.discord;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.admin.Admin;
 import me.totalfreedom.totalfreedommod.player.PlayerData;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class PrivateMessageListener extends ListenerAdapter
 {
-    public void onPrivateMessageReceived(PrivateMessageReceivedEvent event)
+    @Override
+    public void onMessageReceived(MessageReceivedEvent event)
     {
+        if(event.getChannelType() != ChannelType.PRIVATE) {
+            return;
+        }
+
         if (!event.getAuthor().getId().equals(event.getJDA().getSelfUser().getId()))
         {
             // Handle link code

@@ -9,10 +9,11 @@ import me.totalfreedom.totalfreedommod.rank.Displayable;
 import me.totalfreedom.totalfreedommod.rank.RankManager;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -56,7 +57,7 @@ public class ListCommand extends DiscordCommandImpl
     }
 
     @Override
-    public MessageBuilder execute(Member member, List<String> args)
+    public MessageCreateBuilder execute(Member member, List<String> args)
     {
         if (PLUGIN == null)
         {
@@ -101,6 +102,6 @@ public class ListCommand extends DiscordCommandImpl
                     String.join(", ", players), false);
         }
 
-        return new MessageBuilder().setEmbed(embedBuilder.build());
+        return MessageCreateBuilder.from(MessageCreateData.fromEmbeds(embedBuilder.build()));
     }
 }

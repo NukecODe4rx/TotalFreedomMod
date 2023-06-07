@@ -5,8 +5,9 @@ import me.totalfreedom.totalfreedommod.discord.command.DiscordCommand;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandImpl;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandManager;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class HelpCommand extends DiscordCommandImpl
     }
 
     @Override
-    public MessageBuilder execute(Member member, List<String> args)
+    public MessageCreateBuilder execute(Member member, List<String> args)
     {
         final EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(Color.GREEN);
@@ -81,6 +82,6 @@ public class HelpCommand extends DiscordCommandImpl
             embedBuilder.addField(category, fieldValue.toString().trim(), false);
         }
 
-        return new MessageBuilder().setEmbed(embedBuilder.build());
+        return MessageCreateBuilder.from(MessageCreateData.fromEmbeds(embedBuilder.build()));
     }
 }

@@ -2,13 +2,17 @@ package me.totalfreedom.totalfreedommod.discord;
 
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.util.FLog;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
+import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 public class MessageReactionListener extends ListenerAdapter
 {
@@ -34,7 +38,15 @@ public class MessageReactionListener extends ListenerAdapter
             return;
         }
 
-        if (!messageReactionAddEvent.getReactionEmote().getEmoji().equals("\uD83D\uDCCB"))
+        EmojiUnion emojiUnion = messageReactionAddEvent.getEmoji();
+
+        if (emojiUnion.getType() != Emoji.Type.UNICODE) {
+            return;
+        }
+
+        UnicodeEmoji unicodeEmoji = emojiUnion.asUnicode();
+
+        if (!unicodeEmoji.getAsReactionCode().equals("\uD83D\uDCCB"))
         {
             return;
         }
@@ -57,10 +69,9 @@ public class MessageReactionListener extends ListenerAdapter
 
         // We don't need other embeds... yet?
         final MessageEmbed embed = message.getEmbeds().get(0);
-        final MessageBuilder archiveMessageBuilder = new MessageBuilder();
-        archiveMessageBuilder.setContent("Report completed by " + completer.getUser().getAsMention() + " (" + Discord.deformat(completer.getUser().getAsTag() + ")"));
-        archiveMessageBuilder.setEmbed(embed);
-        final Message archiveMessage = archiveMessageBuilder.build();
+        final MessageCreateBuilder createBuilder = MessageCreateBuilder.from(MessageCreateData.fromContent("Report completed by " + completer.getUser().getAsMention() + " (" + Discord.deformat(completer.getUser().getAsTag() + ")")));
+        createBuilder.addEmbeds(embed);
+        final MessageCreateData archiveMessage = createBuilder.build();
 
         archiveChannel.sendMessage(archiveMessage).complete();
         message.delete().complete();

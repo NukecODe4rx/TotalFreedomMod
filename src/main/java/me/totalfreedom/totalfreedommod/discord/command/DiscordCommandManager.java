@@ -4,10 +4,12 @@ import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.discord.Discord;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.reflections.Reflections;
 
 import java.awt.*;
@@ -58,23 +60,21 @@ public class DiscordCommandManager
             {
                 if (command.canExecute(member))
                 {
-                    final MessageBuilder messageBuilder = command.execute(member, args);
-                    final Message message = messageBuilder.build();
+                    final MessageCreateBuilder messageBuilder = command.execute(member, args);
+                    final MessageCreateData message = messageBuilder.build();
                     final CompletableFuture<Message> futureMessage = channel.sendMessage(message).submit(true);
 
                     this.discord.sentMessages.add(futureMessage);
                 }
                 else
                 {
-                    final MessageBuilder messageBuilder = new MessageBuilder();
                     final EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setTitle("Command error");
                     embedBuilder.setColor(Color.RED);
                     embedBuilder.setDescription("You don't have permission to execute this command.");
-                    messageBuilder.setEmbed(embedBuilder.build());
-                    final Message message = messageBuilder.build();
+                    final MessageEmbed embed = embedBuilder.build();
 
-                    final CompletableFuture<Message> futureMessage = channel.sendMessage(message).submit(true);
+                    final CompletableFuture<Message> futureMessage = channel.sendMessage(MessageCreateData.fromEmbeds(embed)).submit(true);
 
                     this.discord.sentMessages.add(futureMessage);
                 }
