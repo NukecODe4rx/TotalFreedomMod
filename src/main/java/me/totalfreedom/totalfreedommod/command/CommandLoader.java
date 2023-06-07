@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.util.FLog;
-import org.reflections.Reflections;
+import me.totalfreedom.totalfreedommod.util.Reflections;
 
 public class CommandLoader extends FreedomService
 {
