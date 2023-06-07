@@ -18,7 +18,7 @@ public class Reflections {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public @Unmodifiable <T> Set<Class<? extends T>> getSubTypesOf(final Class<T> typeClass) {
+    public @Unmodifiable <T> Set<Class<? extends T>> getSubTypesOf(final @NotNull Class<T> typeClass) {
         final Set<Class<? extends T>> classes = new LinkedHashSet<>();
 
         final ClassLoader classLoader = this.getClass().getClassLoader();
