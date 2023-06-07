@@ -5,7 +5,7 @@ import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.httpd.HTMLGenerationTools;
 import me.totalfreedom.totalfreedommod.httpd.HTTPDPageBuilder;
 import me.totalfreedom.totalfreedommod.httpd.NanoHTTPD;
-import org.reflections.Reflections;
+import me.totalfreedom.totalfreedommod.util.Reflections;
 
 public class Module_index extends HTTPDModule
 {
