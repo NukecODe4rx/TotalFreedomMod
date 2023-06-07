@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import io.papermc.lib.PaperLib;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -17,7 +16,7 @@ public class Command_plotworld extends FreedomCommand
         World plotworld = server.getWorld("plotworld");
         if (plotworld != null)
         {
-            PaperLib.teleportAsync(playerSender, plotworld.getSpawnLocation());
+            playerSender.teleportAsync(plotworld.getSpawnLocation());
         }
         else
         {

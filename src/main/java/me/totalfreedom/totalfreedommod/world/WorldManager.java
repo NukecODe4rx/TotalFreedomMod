@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.world;
 
-import io.papermc.lib.PaperLib;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.util.FUtil;
@@ -116,7 +115,7 @@ public class WorldManager extends FreedomService
         if (player.getWorld().getName().equalsIgnoreCase(targetWorld))
         {
             playerMsg(player, "Going to main world.", ChatColor.GRAY);
-            PaperLib.teleportAsync(player, Bukkit.getWorlds().get(0).getSpawnLocation());
+            player.teleportAsync(Bukkit.getWorlds().get(0).getSpawnLocation());
             return;
         }
 
@@ -125,7 +124,7 @@ public class WorldManager extends FreedomService
             if (world.getName().equalsIgnoreCase(targetWorld))
             {
                 playerMsg(player, "Going to world: " + targetWorld, ChatColor.GRAY);
-                PaperLib.teleportAsync(player, world.getSpawnLocation());
+                player.teleportAsync(world.getSpawnLocation());
                 return;
             }
         }

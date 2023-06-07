@@ -4,8 +4,9 @@ import me.totalfreedom.totalfreedommod.discord.command.DiscordCommand;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandImpl;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
@@ -45,7 +46,7 @@ public class TPSCommand extends DiscordCommandImpl
     }
 
     @Override
-    public MessageBuilder execute(Member member, List<String> args)
+    public MessageCreateBuilder execute(Member member, List<String> args)
     {
         final EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Server lag information");
@@ -55,6 +56,6 @@ public class TPSCommand extends DiscordCommandImpl
         builder.addField("Allocated Memory", Math.ceil(FUtil.getTotalMem()) + " MB", false);
         builder.addField("Free Memory", Math.ceil(FUtil.getFreeMem()) + " MB", false);
 
-        return new MessageBuilder().setEmbed(builder.build());
+        return MessageCreateBuilder.from(MessageCreateData.fromEmbeds(builder.build()));
     }
 }

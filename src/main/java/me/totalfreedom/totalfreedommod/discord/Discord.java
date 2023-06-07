@@ -29,16 +29,18 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.SelfUser;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.internal.utils.concurrent.CountingThreadFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -197,10 +199,6 @@ public class Discord extends FreedomService
                     .enableIntents(GatewayIntent.GUILD_MEMBERS)
                     .build();
             FLog.info("Discord integration has successfully enabled!");
-        }
-        catch (LoginException e)
-        {
-            FLog.warning("An invalid token for Discord integration was provided, the bot will not enable.");
         }
         catch (IllegalArgumentException e)
         {
@@ -456,11 +454,11 @@ public class Discord extends FreedomService
             }
         }
         MessageEmbed embed = embedBuilder.build();
-        Message message = channel.sendMessage(embed).complete();
+        Message message = channel.sendMessage(MessageCreateData.fromEmbeds(embed)).complete();
 
         if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
         {
-            message.addReaction("\uD83D\uDCCB").complete();
+            message.addReaction(Emoji.fromUnicode("\uD83D\uDCCB")).complete();
         }
 
         return true;
@@ -496,11 +494,11 @@ public class Discord extends FreedomService
         }
 
         MessageEmbed embed = embedBuilder.build();
-        Message message = channel.sendMessage(embed).complete();
+        Message message = channel.sendMessage(MessageCreateData.fromEmbeds(embed)).complete();
 
         if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
         {
-            message.addReaction("\uD83D\uDCCB").complete();
+            message.addReaction(Emoji.fromUnicode("\uD83D\uDCCB")).complete();
         }
 
         return true;

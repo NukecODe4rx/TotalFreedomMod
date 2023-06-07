@@ -39,11 +39,6 @@
     </scm>
 
     <repositories>
-        
-        <repository>
-            <id>atlas-nexus-01-totalfreedom-development</id>
-            <url>https://nexus-01.core.atlas-media.co.uk/repository/totalfreedom-development/</url>
-        </repository>
 
         <repository>
             <id>CodeMC</id>
@@ -90,8 +85,13 @@
             <id>esentialsx-repo</id>
             <url>https://repo.essentialsx.net/releases/</url>
         </repository>
-        
-        
+
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io/</url>
+        </repository>
+
+
     </repositories>
 
     <dependencies>
@@ -100,21 +100,14 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bukkit</artifactId>
-            <version>3.0.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -148,7 +141,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.4.0_352</version>
+            <version>5.0.0-beta.10</version>
             <scope>provided</scope>
         </dependency>
 
@@ -164,13 +157,6 @@
             <artifactId>worldguard-bukkit</artifactId>
             <version>7.0.7</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.papermc</groupId>
-            <artifactId>paperlib</artifactId>
-            <version>1.0.7</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -191,49 +177,9 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.10.2</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.29.0-GA</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>me.totalfreedom</groupId>
-            <artifactId>tfguilds</artifactId>
-            <version>2021.06-RC2</version>
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>23.0.0</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>3.1.2</version>
-            <scope>compile</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
-            <scope>compile</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.eclipse.sisu</groupId>
-            <artifactId>org.eclipse.sisu.inject</artifactId>
-            <version>0.3.5</version>
-        </dependency>
     </dependencies>
 
     <pluginRepositories>
@@ -264,163 +210,6 @@
                     <source>17</source>
                     <target>17</target>
                 </configuration>
-            </plugin>
-
-            <!-- Git describe -->
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.9.10</version>
-                <executions>
-                    <execution>
-                        <id>get-the-git-infos</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>validate-the-git-infos</id>
-                        <goals>
-                            <goal>validateRevision</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <prefix>git</prefix>
-                    <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
-                    <verbose>false</verbose>
-                    <format>properties</format>
-                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
-                    <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
-                    <includeOnlyProperties>
-                        <includeOnlyProperty>git.commit.id.abbrev</includeOnlyProperty>
-                    </includeOnlyProperties>
-                    <gitDescribe>
-                        <skip>false</skip>
-                        <always>false</always>
-                        <abbrev>7</abbrev>
-                        <dirty>-dirty</dirty>
-                        <match>*</match>
-                    </gitDescribe>
-                </configuration>
-            </plugin>
-
-            <!-- Antrun -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <target>
-                                <propertyfile file="${project.basedir}/src/main/resources/build.properties"
-                                              comment="Build information. Edit this to your liking.">
-                                    <entry key="buildAuthor" default="unknown"/>
-                                    <entry key="buildNumber" default="0"/>
-                                    <entry key="buildCodeName" value="${tfm.build.codename}"/>
-                                    <entry key="buildVersion" value="${project.version}"/>
-                                    <entry key="buildDate" value="${timestamp}"/>
-                                    <!--suppress UnresolvedMavenProperty -->
-                                    <entry key="buildHead" value="${git.commit.id.abbrev}"/>
-                                </propertyfile>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Properties -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>${project.basedir}/src/main/resources/build.properties</file>
-                            </files>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Buildnumber -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-
-                <configuration>
-                    <buildNumberPropertyName>maven.buildnumber</buildNumberPropertyName>
-                    <buildNumberPropertiesFileLocation>${project.basedir}/src/main/resources/build.properties
-                    </buildNumberPropertiesFileLocation>
-                    <format>{0,number,#}</format>
-                    <items>
-                        <item>buildNumber</item>
-                    </items>
-                </configuration>
-            </plugin>
-
-            <!-- Shade -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <minimizeJar>true</minimizeJar>
-                            <relocations>
-                                <relocation>
-                                    <pattern>io.papermc.lib</pattern>
-                                    <shadedPattern>me.totalfreedom.totalfreedommod.paperlib
-                                    </shadedPattern> <!-- Replace this -->
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.bstats</pattern>
-                                    <shadedPattern>me.totalfreedom.totalfreedommod</shadedPattern>
-                                </relocation>
-                            </relocations>
-                            <artifactSet>
-                                <includes>
-                                    <include>commons-io:commons-io</include>
-                                    <include>org.apache.commons:commons-lang3</include>
-                                    <include>org.reflections:reflections</include>
-                                    <include>org.javassist:javassist</include>
-                                    <include>io.papermc:paperlib</include>
-                                    <include>org.bstats:bstats-bukkit</include>
-                                    <include>org.bstats:bstats-base</include>
-                                    <include>org.jetbrains:annotations</include>
-                                </includes>
-                            </artifactSet>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

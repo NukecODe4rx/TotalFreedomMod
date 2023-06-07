@@ -1,9 +1,9 @@
 package me.totalfreedom.totalfreedommod.discord.command;
 
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 import java.util.List;
 
@@ -21,5 +21,5 @@ public interface DiscordCommand
 
     boolean canExecute(Member member);
 
-    MessageBuilder execute(Member member, List<String> args);
+    MessageCreateBuilder execute(Member member, List<String> args);
 }
