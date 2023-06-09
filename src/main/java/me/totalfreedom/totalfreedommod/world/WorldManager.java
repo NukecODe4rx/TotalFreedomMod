@@ -50,9 +50,6 @@ public class WorldManager extends FreedomService
     @Override
     public void onStop()
     {
-        flatlands.getWorld().save();
-        adminworld.getWorld().save();
-        masterBuilderWorld.getWorld().save();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
