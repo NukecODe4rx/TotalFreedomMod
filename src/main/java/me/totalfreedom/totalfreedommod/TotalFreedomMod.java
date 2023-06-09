@@ -178,9 +178,6 @@ public class TotalFreedomMod extends JavaPlugin
         cl = new CommandLoader();
         cl.loadCommands();
 
-        BackupManager backups = new BackupManager();
-        backups.createAllBackups();
-
         permissions = new PermissionConfig();
         permissions.load();
 
