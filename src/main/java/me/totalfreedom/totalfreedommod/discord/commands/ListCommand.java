@@ -3,6 +3,7 @@ package me.totalfreedom.totalfreedommod.discord.commands;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.admin.AdminList;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
+import me.totalfreedom.totalfreedommod.discord.Discord;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommand;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandImpl;
 import me.totalfreedom.totalfreedommod.rank.Displayable;
@@ -84,7 +85,7 @@ public class ListCommand extends DiscordCommandImpl
             }
             else
             {
-                displayables.put(displayable, new ArrayList<>(List.of(onlinePlayer.getName())));
+                displayables.put(displayable, new ArrayList<>(List.of(player.getName())));
             }
         });
 
