@@ -5,7 +5,7 @@
 
     <groupId>me.totalfreedom</groupId>
     <artifactId>TotalFreedomMod</artifactId>
-    <version>2022.06.5-IPT</version>
+    <version>2022.06.6-IPT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -111,8 +111,8 @@
 
         <dependency>
             <groupId>me.totalfreedom.scissors</groupId>
-            <artifactId>scissors-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <artifactId>Scissors-API</artifactId>
+            <version>1.19.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 

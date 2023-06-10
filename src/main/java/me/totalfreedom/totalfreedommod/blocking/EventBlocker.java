@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-/* TODO This will have to be changed from com.github.atlasmediagroup.scissors to me.totalfreedom.scissors when we migrate to 1.19 */
-import com.github.atlasmediagroup.scissors.event.block.MasterBlockFireEvent;
+import me.totalfreedom.scissors.event.block.MasterBlockFireEvent;
 import io.papermc.paper.event.player.PlayerSignCommandPreprocessEvent;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;

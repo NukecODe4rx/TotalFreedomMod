@@ -13,6 +13,6 @@ softdepend:
   - JDA
   - Votifier
 authors: [Madgeek1450, Prozza]
-api-version: "1.17"
+api-version: "1.19"
 libraries:
     - commons-io:commons-io:2.11.0
