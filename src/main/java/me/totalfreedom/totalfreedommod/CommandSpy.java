@@ -1,5 +1,6 @@
 package me.totalfreedom.totalfreedommod;
 
+import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.event.EventHandler;
@@ -22,8 +23,7 @@ public class CommandSpy extends FreedomService
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
     {
         server.getOnlinePlayers().stream().filter(player -> plugin.al.isAdmin(player)
-                && plugin.al.getAdmin(player).getCommandSpy() && player != event.getPlayer()).forEach(player ->
-                player.sendMessage(Component.text(event.getPlayer().getName()).append(Component.text(": "))
-                        .append(Component.text(event.getMessage()))));
+                && plugin.al.getAdmin(player).getCommandSpy() && player != event.getPlayer())
+                .forEach(player -> FUtil.playerMsg(player, event.getPlayer().getName() + ": " + event.getMessage()));
     }
 }

@@ -68,7 +68,7 @@ public class Discord extends FreedomService
     public List<CompletableFuture<Message>> sentMessages = new ArrayList<>();
     public Boolean enabled = false;
     private static final ImmutableList<String> DISCORD_SUBDOMAINS = ImmutableList.of("discordapp.com", "discord.com", "discord.gg");
-    private final Pattern DISCORD_MENTION_PATTERN = Pattern.compile("(<@!?([0-9]{16,20})>)");
+    private static final Pattern CHAT_COLOR_PATTERN = Pattern.compile("&([0-9a-fA-Fk-oK-OrR]|#[a-fA-F0-9]{6})");
 
     public static String getCode(PlayerData playerData)
     {
@@ -286,7 +286,7 @@ public class Discord extends FreedomService
         if (message.contains("@"))
         {
             // \u200B is Zero Width Space, invisible on Discord
-            newMessage = message.replaceAll("@", "@\u200B");
+            newMessage = newMessage.replaceAll("@", "@\u200B");
         }
 
         if (message.toLowerCase().contains("discord.gg")) // discord.gg/invite works as an invite
@@ -304,8 +304,10 @@ public class Discord extends FreedomService
 
         if (message.contains("§"))
         {
-            newMessage = message.replaceAll("§", "");
+            newMessage = newMessage.replaceAll("§", "");
         }
+
+        newMessage = CHAT_COLOR_PATTERN.matcher(newMessage).replaceAll("");
 
         return deformat(newMessage);
     }

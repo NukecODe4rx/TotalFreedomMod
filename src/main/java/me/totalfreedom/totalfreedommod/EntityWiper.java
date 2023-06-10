@@ -22,6 +22,10 @@ public class EntityWiper extends FreedomService
             EntityType.BOAT,
             EntityType.LEASH_HITCH,
             EntityType.ITEM_FRAME,
+            EntityType.GLOW_ITEM_FRAME,
+            EntityType.TEXT_DISPLAY,
+            EntityType.ITEM_DISPLAY,
+            EntityType.BLOCK_DISPLAY,
             EntityType.MINECART
     );
     private BukkitTask wiper;
