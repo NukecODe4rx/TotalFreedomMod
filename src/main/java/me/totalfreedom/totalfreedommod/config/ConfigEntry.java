@@ -68,9 +68,6 @@ public enum ConfigEntry
     SERVER_TABLIST_FOOTER(String.class, "server.tablist_footer"),
     //
     SERVER_BAN_MOTD(String.class, "server.motds.ban"),
-    SERVER_ADMINMODE_MOTD(String.class, "server.motds.adminmode"),
-    SERVER_LOCKDOWN_MOTD(String.class, "server.motds.lockdown"),
-    SERVER_WHITELIST_MOTD(String.class, "server.motds.whitelist"),
     SERVER_FULL_MOTD(String.class, "server.motds.full"),
     //
     DISCORD_TOKEN(String.class, "discord.token"),
@@ -166,7 +163,6 @@ public enum ConfigEntry
     FORBIDDEN_WORDS(List.class, "forbidden_words"),
     HOST_SENDER_NAMES(List.class, "host_sender_names"),
     FAMOUS_PLAYERS(List.class, "famous_players"),
-    ADMIN_ONLY_MODE(Boolean.class, "admin_only_mode"),
     ADMIN_INFO(List.class, "admininfo"),
     VOTING_INFO(List.class, "votinginfo"),
     MASTER_BUILDER_INFO(List.class, "masterbuilderinfo"),

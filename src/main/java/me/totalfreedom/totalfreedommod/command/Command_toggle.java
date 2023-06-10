@@ -18,7 +18,7 @@ public class Command_toggle extends FreedomCommand
 {
     private final List<String> toggles = Arrays.asList(
             "waterplace", "fireplace", "lavaplace", "fluidspread", "lavadmg", "firespread", "frostwalk",
-            "firework", "prelog", "lockdown", "petprotect", "entitywipe", "nonuke [range] [count]",
+            "firework", "prelog", "petprotect", "entitywipe", "nonuke [range] [count]",
             "explosives [radius]", "unsafeenchs", "bells", "armorstands", "structureblocks", "jigsaws", "grindstones",
             "jukeboxes", "spawners", "4chan", "beehives", "respawnanchors", "autotp", "autoclear", "minecarts", "mp44",
             "landmines", "tossmob", "gravity");
@@ -84,14 +84,6 @@ public class Command_toggle extends FreedomCommand
             case "prelog":
             {
                 toggle("Command prelogging is", ConfigEntry.ENABLE_PREPROCESS_LOG);
-                break;
-            }
-
-            case "lockdown":
-            {
-                boolean active = !LoginProcess.isLockdownEnabled();
-                LoginProcess.setLockdownEnabled(active);
-                FUtil.adminAction(sender.getName(), (active ? "A" : "De-a") + "ctivating server lockdown", true);
                 break;
             }
 
@@ -313,7 +305,7 @@ public class Command_toggle extends FreedomCommand
         {
             return Arrays.asList(
                     "waterplace", "fireplace", "lavaplace", "fluidspread", "lavadmg", "firespread", "frostwalk",
-                    "firework", "prelog", "lockdown", "petprotect", "entitywipe", "nonuke", "explosives", "unsafeenchs",
+                    "firework", "prelog", "petprotect", "entitywipe", "nonuke", "explosives", "unsafeenchs",
                     "bells", "armorstands", "structureblocks", "jigsaws", "grindstones", "jukeboxes", "spawners", "4chan", "beehives",
                     "respawnanchors", "autotp", "autoclear", "minecarts", "mp44", "landmines", "tossmob", "gravity");
         }

@@ -19,9 +19,6 @@ server:
   # MOTD Modification
   motds:
     ban: '&cYou are banned.'
-    adminmode: '&cServer is closed.'
-    lockdown: '&cServer is in lock-down.'
-    whitelist: '&cWhitelist enabled.'
     full: '&cServer is full.'
 
   # Shown on join as a title
@@ -522,9 +519,6 @@ flatlands:
 
   # Flatlands generation parameters - Uses CleanroomGenerator syntax - http://dev.bukkit.org/server-mods/cleanroomgenerator/
   generate_params: 16,stone,32,dirt,1,grass_block
-
-# Admin-Only Mode
-admin_only_mode: false
 
 # Toggle Chat
 toggle_chat: true

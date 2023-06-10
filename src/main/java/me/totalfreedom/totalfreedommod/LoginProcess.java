@@ -29,20 +29,9 @@ public class LoginProcess extends FreedomService
     public static final int MIN_USERNAME_LENGTH = 2;
     public static final int MAX_USERNAME_LENGTH = 20;
     public static final Pattern USERNAME_REGEX = Pattern.compile("^[\\w\\d_]{3,20}$");
-    private static boolean lockdownEnabled = false;
     public List<String> TELEPORT_ON_JOIN = new ArrayList<>();
     public List<String> CLEAR_ON_JOIN = new ArrayList<>();
     public List<String> CLOWNFISH_TOGGLE = new ArrayList<>();
-
-    public static boolean isLockdownEnabled()
-    {
-        return lockdownEnabled;
-    }
-
-    public static void setLockdownEnabled(boolean lockdownEnabled)
-    {
-        LoginProcess.lockdownEnabled = lockdownEnabled;
-    }
 
     @Override
     public void onStart()
@@ -163,20 +152,6 @@ public class LoginProcess extends FreedomService
             return;
         }
 
-        // Admin-only mode
-        if (ConfigEntry.ADMIN_ONLY_MODE.getBoolean())
-        {
-            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "Server is temporarily open to admins only.");
-            return;
-        }
-
-        // Lockdown mode
-        if (lockdownEnabled)
-        {
-            event.disallow(PlayerLoginEvent.Result.KICK_OTHER, "Server is currently in lockdown mode.");
-            return;
-        }
-
         // Whitelist
         if (server.hasWhitelist() && !player.isWhitelisted())
         {
@@ -261,22 +236,5 @@ public class LoginProcess extends FreedomService
                 plugin.al.messageAllAdmins(ChatColor.GOLD + "Do " + ChatColor.YELLOW + "/notes " + player.getName() + " list" + ChatColor.GOLD + " to view them.");
             }
         }
-
-        new BukkitRunnable()
-        {
-            @Override
-            public void run()
-            {
-                if (ConfigEntry.ADMIN_ONLY_MODE.getBoolean())
-                {
-                    player.sendMessage(ChatColor.RED + "Server is currently closed to non-admins.");
-                }
-
-                if (lockdownEnabled)
-                {
-                    FUtil.playerMsg(player, "Warning: Server is currenty in lockdown-mode, new players will not be able to join!", ChatColor.RED);
-                }
-            }
-        }.runTaskLater(plugin, 20L);
     }
 }

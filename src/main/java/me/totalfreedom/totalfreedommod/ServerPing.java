@@ -36,24 +36,6 @@ public class ServerPing extends FreedomService
             return;
         }
 
-        if (ConfigEntry.ADMIN_ONLY_MODE.getBoolean())
-        {
-            event.setMotd(FUtil.colorize(ConfigEntry.SERVER_ADMINMODE_MOTD.getString()));
-            return;
-        }
-
-        if (LoginProcess.isLockdownEnabled())
-        {
-            event.setMotd(FUtil.colorize(ConfigEntry.SERVER_LOCKDOWN_MOTD.getString()));
-            return;
-        }
-
-        if (Bukkit.hasWhitelist())
-        {
-            event.setMotd(FUtil.colorize(ConfigEntry.SERVER_WHITELIST_MOTD.getString()));
-            return;
-        }
-
         if (Bukkit.getOnlinePlayers().size() >= Bukkit.getMaxPlayers())
         {
             event.setMotd(FUtil.colorize(ConfigEntry.SERVER_FULL_MOTD.getString()));
