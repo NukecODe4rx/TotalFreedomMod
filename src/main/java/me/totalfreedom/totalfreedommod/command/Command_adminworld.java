@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import io.papermc.lib.PaperLib;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +67,7 @@ public class Command_adminworld extends FreedomCommand
                     if (adminWorld == null || playerSender.getWorld() == adminWorld)
                     {
                         msg("Going to the main world.");
-                        PaperLib.teleportAsync(playerSender, server.getWorlds().get(0).getSpawnLocation());
+                        playerSender.teleportAsync(server.getWorlds().get(0).getSpawnLocation());
                     }
                     else
                     {

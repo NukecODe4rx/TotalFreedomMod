@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import io.papermc.lib.PaperLib;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -41,7 +40,7 @@ public class Command_spectate extends FreedomCommand
 
         if (playerSender.getWorld() != player.getWorld())
         {
-            PaperLib.teleportAsync(playerSender, player.getLocation());
+            playerSender.teleportAsync(player.getLocation());
         }
 
         playerSender.setSpectatorTarget(player);
