@@ -132,7 +132,7 @@ public class Command_ban extends FreedomCommand
 
         if (player != null && !silent)
         {
-            FUtil.bcastMsg(player.getName() + " has been a VERY naughty, naughty boy.", ChatColor.RED);
+            FUtil.bcastMsg(player.getName() + " has been a VERY naughty, naughty person.", ChatColor.RED);
         }
 
         // Ban player
