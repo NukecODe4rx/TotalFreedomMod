@@ -86,8 +86,8 @@
         </repository>
 
         <repository>
-            <id>jitpack</id>
-            <url>https://jitpack.io/</url>
+            <id>atlas-nexus-01-totalfreedom-development</id>
+            <url>https://nexus-01.core.atlas-media.co.uk/repository/totalfreedom-development/</url>
         </repository>
 
 

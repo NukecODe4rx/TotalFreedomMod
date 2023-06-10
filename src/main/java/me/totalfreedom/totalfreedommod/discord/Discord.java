@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.security.auth.login.LoginException;
 
 import com.google.common.collect.ImmutableList;
 import me.totalfreedom.totalfreedommod.FreedomService;
@@ -200,11 +199,6 @@ public class Discord extends FreedomService
                     .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
                     .build();
             FLog.info("Discord integration has successfully enabled!");
-        }
-        catch (LoginException e)
-        {
-            FLog.warning("An invalid token for Discord integration was provided, the bot will not enable.");
-            enabled = false;
         }
         catch (IllegalArgumentException e)
         {
@@ -527,7 +521,7 @@ public class Discord extends FreedomService
         Player player = event.getPlayer();
         String message = event.getMessage();
 
-        if (!ConfigEntry.ADMIN_ONLY_MODE.getBoolean() && !server.hasWhitelist()
+        if (!server.hasWhitelist()
                 && !plugin.pl.getPlayer(player).isMuted() && bot != null)
         {
             messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message));
