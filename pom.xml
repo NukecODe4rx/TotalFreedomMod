@@ -5,7 +5,7 @@
 
     <groupId>me.totalfreedom</groupId>
     <artifactId>TotalFreedomMod</artifactId>
-    <version>2022.06.4-IPT</version>
+    <version>2022.06.5-IPT</version>
     <packaging>jar</packaging>
 
     <properties>
