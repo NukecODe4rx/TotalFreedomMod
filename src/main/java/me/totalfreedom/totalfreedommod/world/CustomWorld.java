@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.world;
 
-import io.papermc.lib.PaperLib;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import org.bukkit.Bukkit;
@@ -47,7 +46,7 @@ public abstract class CustomWorld extends FreedomService
     {
         try
         {
-            PaperLib.teleportAsync(player, getWorld().getSpawnLocation());
+            player.teleportAsync(getWorld().getSpawnLocation());
         }
         catch (Exception ex)
         {
