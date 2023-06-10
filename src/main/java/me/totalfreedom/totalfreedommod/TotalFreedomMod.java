@@ -3,7 +3,6 @@ package me.totalfreedom.totalfreedommod;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
-import me.totalfreedom.totalfreedommod.admin.ActivityLog;
 import me.totalfreedom.totalfreedommod.admin.AdminList;
 import me.totalfreedom.totalfreedommod.banning.BanManager;
 import me.totalfreedom.totalfreedommod.banning.IndefiniteBanList;
@@ -69,7 +68,6 @@ public class TotalFreedomMod extends JavaPlugin
     // Services
     public WorldManager wm;
     public AdminList al;
-    public ActivityLog acl;
     public RankManager rm;
     public CommandBlocker cb;
     public EventBlocker eb;
@@ -229,7 +227,6 @@ public class TotalFreedomMod extends JavaPlugin
             wm = new WorldManager();
             sql = new SQLite();
             al = new AdminList();
-            acl = new ActivityLog();
             rm = new RankManager();
             cb = new CommandBlocker();
             eb = new EventBlocker();
