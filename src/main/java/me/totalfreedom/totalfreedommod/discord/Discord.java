@@ -196,7 +196,7 @@ public class Discord extends FreedomService
                     .setRateLimitPool(RATELIMIT_EXECUTOR)
                     .setChunkingFilter(ChunkingFilter.ALL)
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
-                    .enableIntents(GatewayIntent.GUILD_MEMBERS)
+                    .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
                     .build();
             FLog.info("Discord integration has successfully enabled!");
         }
