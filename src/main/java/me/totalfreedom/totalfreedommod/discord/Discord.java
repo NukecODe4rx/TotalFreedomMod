@@ -68,7 +68,7 @@ public class Discord extends FreedomService
     public List<CompletableFuture<Message>> sentMessages = new ArrayList<>();
     public Boolean enabled = false;
     private static final ImmutableList<String> DISCORD_SUBDOMAINS = ImmutableList.of("discordapp.com", "discord.com", "discord.gg");
-    private static final Pattern CHAT_COLOR_PATTERN = Pattern.compile("&([0-9a-fA-Fk-oK-OrR]|#[a-fA-F0-9]{6})");
+    private static final Pattern CHAT_COLOR_PATTERN = Pattern.compile("&([0-9a-fA-Fk-oK-OrRxX]|#[a-fA-F0-9]{6})");
 
     public static String getCode(PlayerData playerData)
     {
