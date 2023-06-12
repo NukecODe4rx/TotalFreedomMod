@@ -160,8 +160,7 @@ public enum ConfigEntry
     FIRST_JOIN_INFO_ENABLED(Boolean.class, "first_join_info.enabled"),
     AUTO_ENTITY_WIPE(Boolean.class, "auto_wipe"),
     TOGGLE_CHAT(Boolean.class, "toggle_chat"),
-    DEVELOPER_MODE(Boolean.class, "developer_mode"),
-    ANTISPAM_MINUTES(Integer.class, "antispam_minutes");
+    DEVELOPER_MODE(Boolean.class, "developer_mode");
     //
     private final Class<?> type;
     private final String configName;

@@ -1,26 +1,26 @@
 package me.totalfreedom.totalfreedommod;
 
-import me.totalfreedom.totalfreedommod.config.ConfigEntry;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class AntiSpam extends FreedomService
 {
     private ScheduledThreadPoolExecutor cycle;
-    public static final int MSG_PER_CYCLE = 8;
+    public static final int MSG_PER_CYCLE = 10;
     //
-    private Map<Player, Integer> muteCounts = new HashMap<>();
+    private final Map<UUID, Long> chatRatelimit = new HashMap<>();
 
     @Override
     public void onStart()
@@ -46,45 +46,24 @@ public class AntiSpam extends FreedomService
         });
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent event)
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onAsyncPlayerChat(AsyncChatEvent event)
     {
-        final Player player = event.getPlayer();
+        final UUID uuid = event.getPlayer().getUniqueId();
+        if (chatRatelimit.get(uuid) != null) {
+            final long lastChat = chatRatelimit.get(uuid);
+            final long diff = System.currentTimeMillis() - lastChat;
 
-        if (plugin.al.isAdmin(player))
-        {
-            return;
+            if (diff <= 75) {
+                event.setCancelled(true);
+                return;
+            }
         }
 
-        final FPlayer playerdata = plugin.pl.getPlayerSync(player);
-        int count = muteCounts.getOrDefault(player, 0);
-        int minutes = ConfigEntry.ANTISPAM_MINUTES.getInteger();
-
-        // Check for spam
-        if (playerdata.incrementAndGetMsgCount() > MSG_PER_CYCLE && !playerdata.isMuted())
-        {
-            count++;
-            muteCounts.put(player, count);
-
-            int time = count * minutes;
-            playerdata.setMuted(true, time);
-
-            server.broadcast(Component.text(player.getName()).append(Component.text(" has been automatically muted for "))
-                    .append(Component.text(time)).append(Component.text(" minutes for spamming chat."))
-                    .color(NamedTextColor.RED));
-
-            playerdata.resetMsgCount();
-            event.setCancelled(true);
-        }
-        else if (playerdata.incrementAndGetMsgCount() > MSG_PER_CYCLE / 2)
-        {
-            player.sendMessage(Component.text("Please refrain from spamming chat.", NamedTextColor.GRAY));
-            event.setCancelled(true);
-        }
-
+        chatRatelimit.put(uuid, System.currentTimeMillis());
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
     {
         String command = event.getMessage();
@@ -99,19 +78,8 @@ public class AntiSpam extends FreedomService
             return;
         }
 
-        if (plugin.al.isAdmin(player))
-        {
-            return;
-        }
-
         if (fPlayer.incrementAndGetMsgCount() > MSG_PER_CYCLE)
         {
-            server.broadcast(Component.text(player.getName())
-                    .append(Component.text(" was automatically kicked for spamming commands."))
-                    .color(NamedTextColor.RED));
-            plugin.ae.autoEject(player, "Kicked for spamming commands.");
-
-            fPlayer.resetMsgCount();
             event.setCancelled(true);
         }
     }
