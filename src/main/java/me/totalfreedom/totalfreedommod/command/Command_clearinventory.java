@@ -1,5 +1,6 @@
 package me.totalfreedom.totalfreedommod.command;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import me.totalfreedom.totalfreedommod.rank.Rank;
@@ -69,7 +70,7 @@ public class Command_clearinventory extends FreedomCommand
     {
         if (args.length == 1 && plugin.al.isAdmin(sender))
         {
-            List<String> players = FUtil.getPlayerList();
+            List<String> players = new ArrayList<>(FUtil.getPlayerList());
             players.add("-a");
             return players;
         }
