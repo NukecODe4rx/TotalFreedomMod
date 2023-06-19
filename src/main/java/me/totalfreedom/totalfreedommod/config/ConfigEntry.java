@@ -152,7 +152,6 @@ public enum ConfigEntry
     MUTED_BLOCKED_COMMANDS(List.class, "blocked_commands.muted"),
     WILDCARD_BLOCKED_COMMANDS(List.class, "blocked_commands.wildcard"),
     FORBIDDEN_WORDS(List.class, "forbidden_words"),
-    HOST_SENDER_NAMES(List.class, "host_sender_names"),
     ADMIN_INFO(List.class, "admininfo"),
     VOTING_INFO(List.class, "votinginfo"),
     MASTER_BUILDER_INFO(List.class, "masterbuilderinfo"),

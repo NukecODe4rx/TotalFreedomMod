@@ -369,11 +369,6 @@ public class FUtil
         }
     }
 
-    public static boolean isFromHostConsole(String senderName)
-    {
-        return ConfigEntry.HOST_SENDER_NAMES.getList().contains(senderName.toLowerCase());
-    }
-
     public static boolean fuzzyIpMatch(String a, String b, int octets)
     {
         boolean match = true;

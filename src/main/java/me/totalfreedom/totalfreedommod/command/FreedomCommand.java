@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import me.totalfreedom.bukkittelnet.session.SessionCommandSender;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.admin.Admin;
 import me.totalfreedom.totalfreedommod.player.PlayerData;
@@ -376,7 +377,7 @@ public abstract class FreedomCommand implements CommandExecutor, TabCompleter
                 return true;
             }
 
-            if (perms.blockHostConsole() && FUtil.isFromHostConsole(sender.getName()) && !FUtil.inDeveloperMode())
+            if (perms.blockHostConsole() && sender instanceof ConsoleCommandSender && !(sender instanceof SessionCommandSender))
             {
                 msg(ChatColor.RED + "Host console is not allowed to use this command!");
                 return true;
