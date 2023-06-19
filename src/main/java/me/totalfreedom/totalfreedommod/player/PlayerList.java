@@ -90,18 +90,7 @@ public class PlayerList extends FreedomService
 
     public boolean canManageMasterBuilders(String name)
     {
-        PlayerData data = getData(name);
-
-        return (!ConfigEntry.HOST_SENDER_NAMES.getStringList().contains(name.toLowerCase()) && data != null && !ConfigEntry.SERVER_OWNERS.getStringList().contains(data.getName()))
-                && !ConfigEntry.SERVER_EXECUTIVES.getStringList().contains(data.getName())
-                && !isTelnetMasterBuilder(data)
-                && !ConfigEntry.HOST_SENDER_NAMES.getStringList().contains(name.toLowerCase());
-    }
-
-    public boolean isTelnetMasterBuilder(PlayerData playerData)
-    {
-        Admin admin = plugin.al.getEntryByUuid(playerData.getUuid());
-        return admin != null && admin.getRank().isAtLeast(Rank.ADMIN) && playerData.isMasterBuilder();
+        return FUtil.isExecutive(name);
     }
 
     // May not return null

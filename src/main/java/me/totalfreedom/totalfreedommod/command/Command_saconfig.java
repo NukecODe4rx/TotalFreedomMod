@@ -52,7 +52,10 @@ public class Command_saconfig extends FreedomCommand
 
             case "reload":
             {
-                checkRank(Rank.SENIOR_ADMIN);
+                if (!FUtil.isExecutive(sender.getName()))
+                {
+                    return noPerms();
+                }
 
                 FUtil.adminAction(sender.getName(), "Reloading the admin list", true);
                 plugin.al.load();
@@ -232,7 +235,10 @@ public class Command_saconfig extends FreedomCommand
                 }
 
                 checkConsole();
-                checkRank(Rank.ADMIN);
+                if (!FUtil.isExecutive(sender.getName()))
+                {
+                    return noPerms();
+                }
 
                 Player player = getPlayer(args[1]);
 
