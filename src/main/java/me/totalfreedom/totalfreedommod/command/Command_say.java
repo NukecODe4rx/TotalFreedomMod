@@ -22,24 +22,6 @@ public class Command_say extends FreedomCommand
         }
 
         String message = StringUtils.join(args, " ");
-
-        if (senderIsConsole && FUtil.isFromHostConsole(sender.getName()))
-        {
-            if (message.equalsIgnoreCase("WARNING: Server is restarting, you will be kicked"))
-            {
-                FUtil.bcastMsg("Server is going offline.", ChatColor.GRAY);
-
-                for (Player player : server.getOnlinePlayers())
-                {
-                    player.kickPlayer(ChatColor.LIGHT_PURPLE + "Server is going offline, come back in about 20 seconds.");
-                }
-
-                server.shutdown();
-
-                return true;
-            }
-        }
-
         FUtil.bcastMsg(String.format("[Server:%s] %s", sender.getName(), message), ChatColor.LIGHT_PURPLE);
         plugin.dc.messageChatChannel(String.format("[Server:%s] \u00BB %s", sender.getName(), message));
         return true;
