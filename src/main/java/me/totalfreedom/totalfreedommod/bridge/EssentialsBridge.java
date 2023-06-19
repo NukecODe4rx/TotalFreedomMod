@@ -129,7 +129,7 @@ public class EssentialsBridge extends FreedomService
         try
         {
             User user = getEssentialsUser(username);
-            if (user != null)
+            if (user != null && user.getBase().isOnline())
             {
                 user.setVanished(vanished);
             }
