@@ -1,6 +1,7 @@
 package me.totalfreedom.totalfreedommod.bridge;
 
 import com.earth2me.essentials.Essentials;
+import com.earth2me.essentials.OfflinePlayer;
 import com.earth2me.essentials.User;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
@@ -129,7 +130,7 @@ public class EssentialsBridge extends FreedomService
         try
         {
             User user = getEssentialsUser(username);
-            if (user != null)
+            if (user != null && !(user.getBase() instanceof OfflinePlayer))
             {
                 user.setVanished(vanished);
             }
