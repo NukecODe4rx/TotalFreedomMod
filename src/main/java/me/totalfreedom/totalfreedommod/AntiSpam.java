@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class AntiSpam extends FreedomService
 {
     private ScheduledThreadPoolExecutor cycle;
-    public static final int MSG_PER_CYCLE = 10;
+    public static final int MSG_PER_CYCLE = 6;
     //
     private final Map<UUID, Long> chatRatelimit = new HashMap<>();
 
@@ -54,7 +54,7 @@ public class AntiSpam extends FreedomService
             final long lastChat = chatRatelimit.get(uuid);
             final long diff = System.currentTimeMillis() - lastChat;
 
-            if (diff <= 75) {
+            if (diff <= 150) {
                 event.setCancelled(true);
                 return;
             }
