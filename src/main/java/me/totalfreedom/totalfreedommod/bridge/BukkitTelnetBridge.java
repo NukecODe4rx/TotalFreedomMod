@@ -8,10 +8,12 @@ import me.totalfreedom.bukkittelnet.api.TelnetCommandEvent;
 import me.totalfreedom.bukkittelnet.api.TelnetPreLoginEvent;
 import me.totalfreedom.bukkittelnet.api.TelnetRequestDataTagsEvent;
 import me.totalfreedom.bukkittelnet.session.ClientSession;
+import me.totalfreedom.bukkittelnet.session.SessionCommandSender;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.admin.Admin;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FLog;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -176,5 +178,10 @@ public class BukkitTelnetBridge extends FreedomService
         {
             FLog.severe("Error removing telnet sessions: " + ex.getMessage());
         }
+    }
+
+    public boolean isTelnetSender(final CommandSender sender)
+    {
+        return sender instanceof SessionCommandSender;
     }
 }

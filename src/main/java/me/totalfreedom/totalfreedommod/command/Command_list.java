@@ -53,7 +53,7 @@ public class Command_list extends FreedomCommand
         String onlineStats;
         List<String> players;
 
-        if (listFilter == ListFilter.TELNET_SESSIONS && plugin.al.isAdmin(sender))
+        if (listFilter == ListFilter.TELNET_SESSIONS && plugin.al.isAdmin(sender) && plugin.btb != null)
         {
             players = plugin.btb.getConnectedAdmins().stream().map(Admin::getName).toList();
             onlineStats = ChatColor.BLUE + "There are " + ChatColor.RED + players.size() + ChatColor.BLUE
