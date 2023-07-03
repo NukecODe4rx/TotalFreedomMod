@@ -4,7 +4,6 @@ public enum CommandBlockerAction
 {
 
     BLOCK("b"),
-    BLOCK_AND_EJECT("a"),
     BLOCK_UNKNOWN("u");
     private final String token;
 

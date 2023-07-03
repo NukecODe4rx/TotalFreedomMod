@@ -99,7 +99,6 @@ public class TotalFreedomMod extends JavaPlugin
     public Muter mu;
     public Fuckoff fo;
     public AutoKick ak;
-    public AutoEject ae;
     public Monitors mo;
     public MovementValidator mv;
     public ServerPing sp;
@@ -266,7 +265,6 @@ public class TotalFreedomMod extends JavaPlugin
             pbl = new PVPBlocker();
             fo = new Fuckoff();
             ak = new AutoKick();
-            ae = new AutoEject();
             mo = new Monitors();
         }
 

@@ -37,12 +37,6 @@ public class CommandBlockerEntry
 
     public void doActions(CommandSender sender)
     {
-        if (action == CommandBlockerAction.BLOCK_AND_EJECT && sender instanceof Player)
-        {
-            TotalFreedomMod.getPlugin().ae.autoEject((Player)sender, "You used a prohibited command: " + command);
-            FUtil.bcastMsg(sender.getName() + " was automatically kicked for using harmful commands.", ChatColor.RED);
-            return;
-        }
         if (action == CommandBlockerAction.BLOCK_UNKNOWN)
         {
             sender.sendMessage(Bukkit.spigot().getSpigotConfig().getString("messages.unknown-command"));
