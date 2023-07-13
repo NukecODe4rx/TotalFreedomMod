@@ -52,7 +52,13 @@ public class DiscordCommandManager
     {
         List<String> args = new ArrayList<>(Arrays.asList(content.split(" ")));
 
-        final String alias = args.remove(0).split(PREFIX)[1]; // The joys of command parsing
+        final String[] prefixSplit = args.remove(0).split(PREFIX); // The joys of command parsing
+        if (prefixSplit.length <= 1)
+        {
+            return;
+        }
+
+        final String alias = prefixSplit[1];
 
         for (DiscordCommand command : commands)
         {
