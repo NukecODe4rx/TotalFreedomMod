@@ -160,16 +160,6 @@ adminlist:
   # Handy in development environments.
   console_is_admin: true
 
-# CoreProtect
-# Requires CoreProtect
-coreprotect:
-  enabled: false
-  host: 'localhost'
-  port: '3306'
-  username: ''
-  password: ''
-  database: 'coreprotect'
-
 # ForceIP configuration
 forceip:
   enabled: false
