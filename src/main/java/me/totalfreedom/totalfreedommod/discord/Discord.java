@@ -1,6 +1,9 @@
 package me.totalfreedom.totalfreedommod.discord;
 
 import com.google.common.base.Strings;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -10,7 +13,7 @@ import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.regex.Matcher;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
@@ -24,25 +27,19 @@ import me.totalfreedom.totalfreedommod.util.FLog;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.SelfUser;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.internal.utils.concurrent.CountingThreadFactory;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.WordUtils;
@@ -80,6 +77,37 @@ public class Discord extends FreedomService
             }
         }
         return null;
+    }
+
+    // I need these so the server doesn't throw a fit when JDA isn't present.
+    private static void addRole(final Guild server, final Member member, final Role role) {
+        try
+        {
+            final Method method = server.getClass().getMethod("addRoleToMember", UserSnowflake.class, Role.class);
+            ((AuditableRestAction<Void>)method.invoke(server, member, role)).complete();
+        }
+        catch (Exception ignored) {}
+    }
+
+    private static void removeRole(final Guild server, final Member member, final Role role) {
+        try
+        {
+            final Method method = server.getClass().getMethod("removeRoleFromMember", UserSnowflake.class, Role.class);
+            ((AuditableRestAction<Void>)method.invoke(server, member, role)).complete();
+        }
+        catch (Exception ignored) {}
+    }
+
+    private static Object getEmoji(final String unicode) {
+        try
+        {
+            final Method method = Emoji.class.getMethod("fromUnicode", String.class);
+            return method.invoke(null, unicode);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     public static boolean syncRoles(Admin admin, String discordID)
@@ -120,11 +148,11 @@ public class Discord extends FreedomService
         {
             if (member.getRoles().contains(adminRole))
             {
-                server.removeRoleFromMember(member, adminRole).complete();
+                removeRole(server, member, adminRole);
             }
             if (member.getRoles().contains(senioradminRole))
             {
-                server.removeRoleFromMember(member, senioradminRole).complete();
+                removeRole(server, member, senioradminRole);
             }
             return true;
         }
@@ -133,11 +161,11 @@ public class Discord extends FreedomService
         {
             if (!member.getRoles().contains(adminRole))
             {
-                server.addRoleToMember(member, adminRole).complete();
+                addRole(server, member, adminRole);
             }
             if (member.getRoles().contains(senioradminRole))
             {
-                server.removeRoleFromMember(member, senioradminRole).complete();
+                removeRole(server, member, senioradminRole);
             }
             return true;
         }
@@ -145,11 +173,11 @@ public class Discord extends FreedomService
         {
             if (!member.getRoles().contains(senioradminRole))
             {
-                server.addRoleToMember(member, senioradminRole).complete();
+                addRole(server, member, senioradminRole);
             }
             if (member.getRoles().contains(adminRole))
             {
-                server.removeRoleFromMember(member, adminRole).complete();
+                removeRole(server, member, adminRole);
             }
             return true;
         }
@@ -436,7 +464,7 @@ public class Discord extends FreedomService
 
         if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
         {
-            message.addReaction(Emoji.fromUnicode("\uD83D\uDCCB")).complete();
+            message.addReaction((Emoji)getEmoji("\uD83D\uDCCB")).complete();
         }
 
         return true;
@@ -476,7 +504,7 @@ public class Discord extends FreedomService
 
         if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
         {
-            message.addReaction(Emoji.fromUnicode("\uD83D\uDCCB")).complete();
+            message.addReaction((Emoji)getEmoji("\uD83D\uDCCB")).complete();
         }
 
         return true;

@@ -2,12 +2,11 @@ name: TotalFreedomMod
 main: me.totalfreedom.totalfreedommod.TotalFreedomMod
 version: ${project.version}
 description: Plugin for the Total Freedom server.
-depend:
-  - JDA
 softdepend:
   - BukkitTelnet
   - CoreProtect
   - Essentials
+  - JDA
   - LibsDisguises
   - WorldEdit
   - WorldGuard
