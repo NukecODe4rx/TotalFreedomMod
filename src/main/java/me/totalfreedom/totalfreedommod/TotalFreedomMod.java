@@ -100,7 +100,6 @@ public class TotalFreedomMod extends JavaPlugin
     public Fuckoff fo;
     public AutoKick ak;
     public Monitors mo;
-    public MovementValidator mv;
     public ServerPing sp;
     public ItemFun it;
     public Landminer lm;
@@ -176,7 +175,6 @@ public class TotalFreedomMod extends JavaPlugin
         permissions = new PermissionConfig();
         permissions.load();
 
-        mv = new MovementValidator();
         sp = new ServerPing();
 
         new Initializer();
