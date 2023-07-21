@@ -52,6 +52,7 @@ server:
   tablist_footer: ''
 
 # Discord
+# Requires https://github.com/IPTFreedom/Minecraft-JDA
 discord:
   # If you do not have a token, make a bot account and get one at https://discordapp.com/developers/applications/me
   token: ''
@@ -160,6 +161,7 @@ adminlist:
   console_is_admin: true
 
 # CoreProtect
+# Requires CoreProtect
 coreprotect:
   enabled: false
   host: 'localhost'

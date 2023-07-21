@@ -67,7 +67,11 @@ public class CoreProtectBridge extends FreedomService
         try
         {
             final Plugin coreProtectPlugin = server.getPluginManager().getPlugin("CoreProtect");
-            assert coreProtectPlugin != null;
+            if (coreProtectPlugin == null)
+            {
+                return null;
+            }
+
             if (coreProtectPlugin instanceof CoreProtect)
             {
                 coreProtect = (CoreProtect)coreProtectPlugin;
@@ -87,6 +91,10 @@ public class CoreProtectBridge extends FreedomService
             try
             {
                 final CoreProtect coreProtect = getCoreProtect();
+                if (coreProtect == null)
+                {
+                    return null;
+                }
 
                 coreProtectAPI = coreProtect.getAPI();
 
@@ -107,13 +115,7 @@ public class CoreProtectBridge extends FreedomService
 
     public boolean isEnabled()
     {
-        if (!server.getPluginManager().isPluginEnabled("CoreProtect"))
-        {
-            return false;
-        }
-
         final CoreProtect coreProtect = getCoreProtect();
-
         return coreProtect != null && coreProtect.isEnabled();
     }
 

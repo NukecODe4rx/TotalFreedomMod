@@ -76,16 +76,23 @@ public class Command_dispfill extends FreedomCommand
                     for (int zOffset = -radius; zOffset <= radius; zOffset++)
                     {
                         final Block targetBlock = centerBlock.getRelative(xOffset, yOffset, zOffset);
-                        if (targetBlock.getLocation().distanceSquared(centerLocation) < (radius * radius))
+                        if (targetBlock.getLocation().distanceSquared(centerLocation) > (radius * radius))
                         {
-                            if (targetBlock.getType().equals(Material.DISPENSER))
-                            {
-                                msg("Filling dispenser @ " + FUtil.formatLocation(targetBlock.getLocation()));
-                                plugin.cpb.getCoreProtectAPI().logContainerTransaction(sender.getName(), targetBlock.getLocation());
-                                setDispenserContents(targetBlock, itemsArray);
-                                affected++;
-                            }
+                            continue;
                         }
+
+                        if (!targetBlock.getType().equals(Material.DISPENSER))
+                        {
+                            continue;
+                        }
+
+                        msg("Filling dispenser @ " + FUtil.formatLocation(targetBlock.getLocation()));
+                        if (plugin.cpb.isEnabled())
+                        {
+                            plugin.cpb.getCoreProtectAPI().logContainerTransaction(sender.getName(), targetBlock.getLocation());
+                        }
+                        setDispenserContents(targetBlock, itemsArray);
+                        affected++;
                     }
                 }
             }

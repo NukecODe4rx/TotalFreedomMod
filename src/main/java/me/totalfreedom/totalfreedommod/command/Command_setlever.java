@@ -66,7 +66,10 @@ public class Command_setlever extends FreedomCommand
             state.setBlockData(data);
             state.update();
 
-            plugin.cpb.getCoreProtectAPI().logInteraction(sender.getName(), leverLocation);
+            if (plugin.cpb.isEnabled())
+            {
+                plugin.cpb.getCoreProtectAPI().logInteraction(sender.getName(), leverLocation);
+            }
         }
         else
         {
