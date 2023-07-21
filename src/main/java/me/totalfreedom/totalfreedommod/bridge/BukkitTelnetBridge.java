@@ -92,7 +92,7 @@ public class BukkitTelnetBridge extends FreedomService
 
             playerTags.put("tfm.playerdata.getTag", plugin.pl.getPlayer(player).getTag());
 
-            if (server.getPluginManager().isPluginEnabled("Essentials"))
+            if (plugin.esb.isEnabled())
             {
                 playerTags.put("tfm.essentialsBridge.getNickname", plugin.esb.getNickname(player.getName()));
             }

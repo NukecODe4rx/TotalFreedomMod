@@ -43,7 +43,10 @@ public class EssentialsBridge extends FreedomService
             try
             {
                 final Plugin essentials = server.getPluginManager().getPlugin("Essentials");
-                assert essentials != null;
+                if (essentials == null)
+                {
+                    return null;
+                }
                 if (essentials instanceof Essentials)
                 {
                     essentialsPlugin = (Essentials)essentials;

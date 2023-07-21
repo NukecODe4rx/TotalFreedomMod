@@ -77,7 +77,7 @@ public class PVPBlocker extends FreedomService
                 player.sendMessage(ChatColor.RED + "Creative PvP is not allowed!");
                 event.setCancelled(true);
             }
-            else if (plugin.esb.getEssentialsUser(player.getName()).isGodModeEnabled())
+            else if (plugin.esb.isEnabled() && plugin.esb.getEssentialsUser(player.getName()).isGodModeEnabled())
             {
                 player.sendMessage(ChatColor.RED + "God mode PvP is not allowed!");
                 event.setCancelled(true);

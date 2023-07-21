@@ -16,6 +16,12 @@ public class Command_nicknyan extends FreedomCommand
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
+        if (!plugin.esb.isEnabled())
+        {
+            msg("Essentials is not enabled on this server.");
+            return true;
+        }
+
         if (args.length != 1)
         {
             return false;
