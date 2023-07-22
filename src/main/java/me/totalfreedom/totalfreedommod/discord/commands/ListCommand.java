@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class ListCommand extends DiscordCommandImpl
 {
-    private static final TotalFreedomMod PLUGIN = TotalFreedomMod.plugin();
+    private static final TotalFreedomMod PLUGIN = TotalFreedomMod.getPlugin();
 
     @Override
     public String getCommandName()

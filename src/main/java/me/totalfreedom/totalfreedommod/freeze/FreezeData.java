@@ -9,7 +9,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import static me.totalfreedom.totalfreedommod.TotalFreedomMod.plugin;
+
+import static me.totalfreedom.totalfreedommod.TotalFreedomMod.getPlugin;
 import static me.totalfreedom.totalfreedommod.player.FPlayer.AUTO_PURGE_TICKS;
 
 public class FreezeData
@@ -65,7 +66,7 @@ public class FreezeData
                 setFrozen(false);
             }
 
-        }.runTaskLater(Objects.requireNonNull(plugin()), AUTO_PURGE_TICKS);
+        }.runTaskLater(getPlugin(), AUTO_PURGE_TICKS);
     }
 
     public Location getLocation()

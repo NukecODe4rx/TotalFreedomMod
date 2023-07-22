@@ -125,18 +125,6 @@ public class TotalFreedomMod extends JavaPlugin
         return plugin;
     }
 
-    public static TotalFreedomMod plugin()
-    {
-        for (Plugin plugin : Bukkit.getPluginManager().getPlugins())
-        {
-            if (plugin.getName().equalsIgnoreCase(pluginName))
-            {
-                return (TotalFreedomMod)plugin;
-            }
-        }
-        return null;
-    }
-
     @Override
     public void onLoad()
     {

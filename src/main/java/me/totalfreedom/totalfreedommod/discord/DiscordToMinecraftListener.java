@@ -3,6 +3,8 @@ package me.totalfreedom.totalfreedommod.discord;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandManager;
+import me.totalfreedom.totalfreedommod.discord.pluralkit.PluralKitMember;
+import me.totalfreedom.totalfreedommod.discord.pluralkit.PluralKitSystem;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.rank.Title;
 import me.totalfreedom.totalfreedommod.util.FLog;
@@ -80,22 +82,33 @@ public class DiscordToMinecraftListener extends ListenerAdapter
         emsg.append(inviteLink);
         emsg.append(ChatColor.DARK_GRAY + "] ", ComponentBuilder.FormatRetention.NONE);
 
-        // Tag (if they have one)
-        if (tag != null)
-        {
-            emsg.append(tag);
+        final PluralKitSystem pluralKitSystem = Discord.pluralKit != null ? Discord.pluralKit.getSystemInfo(member.getId()) : null;
+        final PluralKitMember pluralKitMember = pluralKitSystem != null ? pluralKitSystem.getMemberForMessage(msg.getContentRaw()) : null;
+        final TextComponent user;
+        if (pluralKitMember == null) {
+            // Tag (if they have one)
+            if (tag != null) {
+                emsg.append(tag);
+                emsg.append(" ");
+            }
+
+            // User
+            user = new TextComponent(FUtil.stripColors(member.getEffectiveName()));
+        } else {
+            user = new TextComponent(FUtil.stripColors(pluralKitMember.name()));
         }
 
-        emsg.append(" ");
-
-        // User
-        TextComponent user = new TextComponent(FUtil.stripColors(member.getEffectiveName()));
         user.setColor(ChatColor.RED.asBungee());
         emsg.append(user);
 
         // Message
-        emsg.append(ChatColor.DARK_GRAY + ": " + ChatColor.RESET
-                + FUtil.stripColors(msg.getContentDisplay()), ComponentBuilder.FormatRetention.NONE);
+        emsg.append(ChatColor.DARK_GRAY + ": " + ChatColor.RESET, ComponentBuilder.FormatRetention.NONE);
+
+        if (pluralKitMember == null) {
+            emsg.append(FUtil.stripColors(msg.getContentDisplay()), ComponentBuilder.FormatRetention.NONE);
+        } else {
+            emsg.append(FUtil.stripColors(pluralKitMember.stripMessage(msg.getContentDisplay())), ComponentBuilder.FormatRetention.NONE);
+        }
 
         // Attachments
         if (!msg.getAttachments().isEmpty())

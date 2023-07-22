@@ -21,6 +21,7 @@ import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.admin.Admin;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandManager;
+import me.totalfreedom.totalfreedommod.discord.pluralkit.PluralKitIntegration;
 import me.totalfreedom.totalfreedommod.player.PlayerData;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FLog;
@@ -60,6 +61,7 @@ public class Discord extends FreedomService
 
     public static HashMap<String, PlayerData> LINK_CODES = new HashMap<>();
     public static JDA bot = null;
+    public static PluralKitIntegration pluralKit = null;
     public static DiscordCommandManager DISCORD_COMMAND_MANAGER;
     public ScheduledThreadPoolExecutor RATELIMIT_EXECUTOR;
     public List<CompletableFuture<Message>> sentMessages = new ArrayList<>();
@@ -238,6 +240,10 @@ public class Discord extends FreedomService
             FLog.warning("The JDA plugin is not installed, therefore the discord bot cannot start.");
             FLog.warning("To resolve this error, please download the latest JDA from: https://github.com/AtlasMediaGroup/Minecraft-JDA/releases");
             enabled = false;
+        }
+
+        if (ConfigEntry.DISCORD_PLURALKIT_INTEGRATION.getBoolean()) {
+            pluralKit = new PluralKitIntegration();
         }
 
     }

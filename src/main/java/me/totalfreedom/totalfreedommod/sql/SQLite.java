@@ -7,11 +7,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import com.google.common.base.Strings;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.admin.Admin;
 import me.totalfreedom.totalfreedommod.banning.Ban;
+import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.player.PlayerData;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import me.totalfreedom.totalfreedommod.util.FUtil;
@@ -91,6 +95,19 @@ public class SQLite extends FreedomService
                     FLog.severe("Failed to create the admins table: " + e.getMessage());
                 }
             }
+
+            if (tableExists(meta, "discord") && !Strings.isNullOrEmpty(ConfigEntry.DISCORD_TOKEN.getString()))
+            {
+                try
+                {
+                    connection.createStatement().execute("CREATE TABLE `discord` (`id` VARCHAR PRIMARY KEY, `pluralkit_enabled` BOOLEAN NOT NULL);");
+                }
+                catch (SQLException e)
+                {
+                    FLog.severe("Failed to create the admins table: " + e.getMessage());
+                }
+            }
+
             if (tableExists(meta, "players"))
             {
                 try
@@ -334,6 +351,35 @@ public class SQLite extends FreedomService
         }
 
         return null;
+    }
+
+    public List<String> getPluralKitUsers() {
+        try {
+            final ResultSet resultSet = connection.createStatement().executeQuery("SELECT id FROM discord WHERE pluralkit_enabled=true");
+            final List<String> ids = new ArrayList<>();
+            while (resultSet.next()) {
+                ids.add(resultSet.getString(1));
+            }
+
+            return ids;
+        } catch (SQLException e) {
+            FLog.severe("Failed to query pluralkit data:");
+            FLog.severe(e);
+        }
+
+        return List.of();
+    }
+
+    public void setDiscordValue(final String id, final boolean pluralKitEnabled) {
+        try {
+            PreparedStatement statement = connection.prepareStatement(MessageFormat.format("INSERT INTO discord(id, pluralkit_enabled) VALUES(''{0}'', ?) ON CONFLICT(id) DO UPDATE SET pluralkit_enabled=?", id));
+            statement.setBoolean(1, pluralKitEnabled);
+            statement.setBoolean(2, pluralKitEnabled);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            FLog.severe("Failed to add discord user:");
+            FLog.severe(e);
+        }
     }
 
     public void removeAdmin(Admin admin)
