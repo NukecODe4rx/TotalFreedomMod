@@ -9,17 +9,9 @@ In terms of plugin releases, our support matrix is as follows:
 ### Actively Supported
 These versions are currently actively supported by our team, and you should expect security patches where appropriate for these versions. 
 
-| Version             | Supported  | Support End:                   |
-| ------------------- | ---------- | ------------------------------ |
-| 2022.02             | ✅         | No Earlier than May 2022       |
-
-### Legacy Supported
-These versions are no longer under active development, however we will look to release critical secuirty patches where appropriate. 
-
-| Version             | Supported  | Support End: |
-| ------------------- | ---------- | ------------ |
-| 2021.09             | ⚠️         | April 2022   |
-
+| Version | Supported  | Support End: |
+| ------- | ---------- | ------------ |
+| Latest  | ✅         | Never        |
 
 ### No Longer Supported
 These versions are no longer supported at all. It is strongly advised to update if you are running any of these versions. 
