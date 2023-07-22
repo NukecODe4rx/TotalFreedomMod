@@ -26,14 +26,11 @@ import static org.bukkit.Bukkit.getServer;
 
 public class FUtil
 {
-    /* See https://github.com/TotalFreedom/License - None of the listed names may be removed.
-    Leaving this list here for anyone running TFM on a cracked server:
-    public static final List<String> DEVELOPERS = Arrays.asList("Madgeek1450", "Prozza", "WickedGamingUK", "Wild1145", "aggelosQQ", "scripthead", "Telesphoreo", "CoolJWB");
-    */
+    /* See https://github.com/TotalFreedom/License - None of the listed names may be removed. */
     public static final List<String> DEVELOPERS = Arrays.asList(
             "1156a81a-23fb-435e-9aff-fe9c2ea7e82d", // Madgeek1450
             "f9a1982e-252e-4ed3-92ed-52b0506a39c9", // Prozza
-            "90eb5d86-ed60-4165-a36e-bb77aa3c6664", // WickedGamingUK
+            "90eb5d86-ed60-4165-a36e-bb77aa3c6664", // Fyrsta
             "604cbb51-842d-4b43-8b0a-d1d7c6cd2869", // Wild1145
             "e67d77c4-fff9-4cea-94cc-9f1f1ab7806b", // aggelosQQ
             "0061326b-8b3d-44c8-830a-5f2d59f5dc1b", // scripthead
@@ -42,19 +39,20 @@ public class FUtil
             "d018f2b8-ce60-4672-a45f-e580e0331299", // speednt
             "458de06f-36a5-4e1b-aaa6-ec1d1751c5b6", // SupItsDillon
             "c8e5af82-6aba-4dd7-83e8-474381380cc9", // Paldiu
-            "ba5aafba-9012-418f-9819-a7020d591068",  // TFTWPhoenix
-            "d6dd9740-40db-45f5-ab16-4ee16a633009", // Abhi
+            "ba5aafba-9012-418f-9819-a7020d591068", // MadelynWith5Ns
+            "d6dd9740-40db-45f5-ab16-4ee16a633009", // MysticBlaxe
             "2e06e049-24c8-42e4-8bcf-d35372af31e6", // NotInSync
             "f97c0d7b-6413-4558-a409-88f09a8f9adb", // videogamesm12
             "78408086-1991-4c33-a571-d8fa325465b2", // Telesphoreo
             "f5cd54c4-3a24-4213-9a56-c06c49594dff", // Taahh
             "a52f1f08-a398-400a-bca4-2b74b81feae6", // G6_
-            "ca83b658-c03b-4106-9edc-72f70a80656d" // ayunami2000
+            "ca83b658-c03b-4106-9edc-72f70a80656d", // ayunami2000
+            "f5ed01cd-3651-48af-99fc-d21a034583c7"  // maniaplay
     );
     public static final List<String> DEVELOPER_NAMES = Arrays.asList(
             "Madgeek1450",
             "Prozza",
-            "WickedGamingUK",
+            "Fyrsta",
             "Wild1145",
             "aggelosQQ",
             "scripthead",
@@ -64,13 +62,15 @@ public class FUtil
             "speednt",
             "SupItsDillon",
             "Paldiu",
-            "TFTWPhoenix",
-            "abhithedev",
+            "MadelynWith5Ns",
+            "MysticBlaxe",
             "NotInSync",
             "videogamesm12",
             "Taahh",
             "G6_",
-            "ayunami2000");
+            "ayunami2000",
+            "maniaplay"
+    );
     public static final Map<String, ChatColor> CHAT_COLOR_NAMES = new HashMap<>();
     public static final List<ChatColor> CHAT_COLOR_POOL = Arrays.asList(
             ChatColor.DARK_RED,
@@ -261,14 +261,6 @@ public class FUtil
                 Math.round(location.getZ()));
     }
 
-    public static boolean deleteFolder(File file)
-    {
-        if (file.exists() && file.isDirectory())
-        {
-            return FileUtils.deleteQuietly(file);
-        }
-        return false;
-    }
 
     public static void deleteCoreDumps()
     {

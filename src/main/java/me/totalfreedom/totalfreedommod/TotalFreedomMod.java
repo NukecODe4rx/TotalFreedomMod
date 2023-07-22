@@ -146,7 +146,6 @@ public class TotalFreedomMod extends JavaPlugin
 
         // Delete unused files
         FUtil.deleteCoreDumps();
-        FUtil.deleteFolder(new File("./_deleteme"));
 
         fsh = new FreedomServiceHandler();
 
