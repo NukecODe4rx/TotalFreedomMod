@@ -37,6 +37,8 @@ public class AntiSpam extends FreedomService
 
     private void cycle()
     {
+        final long millis = System.currentTimeMillis();
+        chatRatelimit.values().removeIf(last -> (millis - last) >= 1000);
         server.getOnlinePlayers().stream().map(player -> plugin.pl.getPlayer(player)).forEach(fPlayer ->
         {
             // TODO: Move each to their own section
