@@ -13,6 +13,9 @@ import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
+import org.bukkit.block.sign.SignSide;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -57,15 +60,15 @@ public final class AdminWorld extends CustomWorld
 
         final Block welcomeSignBlock = world.getBlockAt(0, 50, 0);
         welcomeSignBlock.setType(Material.OAK_SIGN);
-        org.bukkit.block.Sign welcomeSign = (org.bukkit.block.Sign)welcomeSignBlock.getState();
+        Sign welcomeSign = (Sign)welcomeSignBlock.getState();
 
-        org.bukkit.material.Sign signData = (org.bukkit.material.Sign)welcomeSign.getData();
-        signData.setFacingDirection(BlockFace.NORTH);
+        // TODO: Populate both sides of sign. Requires API bump to 1.20
+        SignSide signSide = welcomeSign.getSide(Side.FRONT);
 
-        welcomeSign.setLine(0, ChatColor.GREEN + "AdminWorld");
-        welcomeSign.setLine(1, ChatColor.DARK_GRAY + "---");
-        welcomeSign.setLine(2, ChatColor.YELLOW + "Spawn Point");
-        welcomeSign.setLine(3, ChatColor.DARK_GRAY + "---");
+        signSide.setLine(0, ChatColor.GREEN + "AdminWorld");
+        signSide.setLine(1, ChatColor.DARK_GRAY + "---");
+        signSide.setLine(2, ChatColor.YELLOW + "Spawn Point");
+        signSide.setLine(3, ChatColor.DARK_GRAY + "---");
         welcomeSign.update();
 
         plugin.gr.commitGameRules();
