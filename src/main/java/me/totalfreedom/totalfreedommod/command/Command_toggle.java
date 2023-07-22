@@ -19,9 +19,9 @@ public class Command_toggle extends FreedomCommand
     private final List<String> toggles = Arrays.asList(
             "waterplace", "fireplace", "lavaplace", "fluidspread", "lavadmg", "firespread", "frostwalk",
             "firework", "prelog", "lockdown", "petprotect", "entitywipe", "nonuke [range] [count]",
-            "explosives [radius]", "unsafeenchs", "bells", "armorstands", "masterblocks", "books", "grindstones",
-            "jukeboxes", "spawners", "4chan", "beehives", "respawnanchors", "autotp", "autoclear", "minecarts", "mp44",
-            "landmines", "tossmob", "gravity");
+            "explosives [radius]", "unsafeenchs", "bells", "armorstands", "masterblocks", "books", "item_drops",
+            "grindstones", "jukeboxes", "spawners", "4chan", "beehives", "respawnanchors", "autotp", "autoclear", "minecarts",
+            "mp44", "landmines", "tossmob", "gravity");
 
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
@@ -194,6 +194,12 @@ public class Command_toggle extends FreedomCommand
             case "books":
             {
                 toggle("Books are", ConfigEntry.ALLOW_BOOKS);
+                break;
+            }
+
+            case "item_drops":
+            {
+                toggle("Item drops are", ConfigEntry.ALLOW_ITEM_DROPS);
                 break;
             }
 
