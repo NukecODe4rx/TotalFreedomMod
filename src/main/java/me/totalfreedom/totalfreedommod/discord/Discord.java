@@ -2,7 +2,6 @@ package me.totalfreedom.totalfreedommod.discord;
 
 import com.google.common.base.Strings;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -10,10 +9,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.SplittableRandom;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.function.Consumer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
@@ -31,7 +29,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -39,7 +36,6 @@ import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.internal.utils.concurrent.CountingThreadFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
@@ -58,16 +54,18 @@ import org.jetbrains.annotations.NotNull;
 
 public class Discord extends FreedomService
 {
+    private static final ImmutableList<String> DISCORD_SUBDOMAINS = ImmutableList.of("discordapp.com", "discord.com", "discord.gg");
+    private static final Pattern CHAT_COLOR_PATTERN = Pattern.compile("&([0-9a-fA-Fk-oK-OrRxX]|#[a-fA-F0-9]{6})");
+
+    private final List<String> messageQueue = new ArrayList<>();
+    private final List<String> adminChatMessageQueue = new ArrayList<>();
+    private ScheduledExecutorService queueSenderExecutor;
 
     public static HashMap<String, PlayerData> LINK_CODES = new HashMap<>();
     public static JDA bot = null;
     public static PluralKitIntegration pluralKit = null;
     public static DiscordCommandManager DISCORD_COMMAND_MANAGER;
-    public ScheduledThreadPoolExecutor RATELIMIT_EXECUTOR;
-    public List<CompletableFuture<Message>> sentMessages = new ArrayList<>();
     public Boolean enabled = false;
-    private static final ImmutableList<String> DISCORD_SUBDOMAINS = ImmutableList.of("discordapp.com", "discord.com", "discord.gg");
-    private static final Pattern CHAT_COLOR_PATTERN = Pattern.compile("&([0-9a-fA-Fk-oK-OrRxX]|#[a-fA-F0-9]{6})");
 
     public static String getCode(PlayerData playerData)
     {
@@ -188,6 +186,14 @@ public class Discord extends FreedomService
 
     public void startBot()
     {
+        if (queueSenderExecutor != null) {
+            queueSenderExecutor.shutdown();
+        }
+
+        queueSenderExecutor = Executors.newSingleThreadScheduledExecutor();
+        messageQueue.clear();
+        adminChatMessageQueue.clear();
+
         DISCORD_COMMAND_MANAGER = new DiscordCommandManager();
         DISCORD_COMMAND_MANAGER.init(this);
 
@@ -199,8 +205,6 @@ public class Discord extends FreedomService
 
         if (bot != null)
         {
-            RATELIMIT_EXECUTOR = new ScheduledThreadPoolExecutor(5, new CountingThreadFactory(this::poolIdentifier, "RateLimit"));
-            RATELIMIT_EXECUTOR.setRemoveOnCancelPolicy(true);
             for (Object object : bot.getRegisteredListeners())
             {
                 bot.removeEventListener(object);
@@ -223,7 +227,6 @@ public class Discord extends FreedomService
                                 }
                             })
                     .setAutoReconnect(true)
-                    .setRateLimitPool(RATELIMIT_EXECUTOR)
                     .setChunkingFilter(ChunkingFilter.ALL)
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
@@ -246,23 +249,34 @@ public class Discord extends FreedomService
             pluralKit = new PluralKitIntegration();
         }
 
-    }
+        final String chatChannelId = ConfigEntry.DISCORD_CHAT_CHANNEL_ID.getString();
+        final String adminChatChannelId = ConfigEntry.DISCORD_ADMINCHAT_CHANNEL_ID.getString();
+        if (chatChannelId != null || adminChatChannelId != null)
+        {
+            queueSenderExecutor.scheduleAtFixedRate(() -> {
+                final TextChannel chatChannel = !Strings.isNullOrEmpty(chatChannelId) ? bot.getTextChannelById(chatChannelId) : null;
+                final TextChannel adminChatChannel = !Strings.isNullOrEmpty(adminChatChannelId) ? bot.getTextChannelById(adminChatChannelId) : null;
 
-    public String poolIdentifier()
-    {
-        return "JDA";
+                final String chatChannelMessage = String.join("\n", messageQueue);
+                final String adminChatChannelMessage = String.join("\n", adminChatMessageQueue);
+                messageQueue.clear();
+                adminChatMessageQueue.clear();
+
+                if (chatChannel != null && !chatChannelMessage.isEmpty()) {
+                    chatChannel.sendMessage(chatChannelMessage).submit(true);
+                }
+                if (adminChatChannel != null && !adminChatChannelMessage.isEmpty()) {
+                    adminChatChannel.sendMessage(adminChatChannelMessage).submit(true);
+                }
+            }, 1, 1, TimeUnit.SECONDS);
+        }
+
     }
 
     public void clearQueue()
     {
-        for (CompletableFuture<Message> messages : sentMessages)
-        {
-            if (!messages.isDone())
-            {
-                messages.cancel(true);
-            }
-        }
-        sentMessages.clear();
+        messageQueue.clear();
+        adminChatMessageQueue.clear();
         messageChatChannel("**Message queue cleared**", true);
     }
 
@@ -346,43 +360,33 @@ public class Discord extends FreedomService
         return deformat(newMessage);
     }
 
-    public void messageChatChannel(String message)
-    {
-        messageChatChannel(message, false);
-    }
-
     public void messageChatChannel(String message, boolean system)
     {
-        String chat_channel_id = ConfigEntry.DISCORD_CHAT_CHANNEL_ID.getString();
-
-        String sanitizedMessage = (system) ? message : sanitizeChatMessage(message);
-
+        String sanitizedMessage = system ? message : sanitizeChatMessage(message);
         if (sanitizedMessage.isBlank()) return;
 
-        if (enabled && !chat_channel_id.isEmpty())
+        if (enabled)
         {
-            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).submit(true);
-            sentMessages.add(sentMessage);
-        }
-    }
+            if (messageQueue.size() >= 5) {
+                messageQueue.remove(0);
+            }
 
-    public void messageAdminChatChannel(String message)
-    {
-        messageAdminChatChannel(message, false);
+            messageQueue.add(sanitizedMessage);
+        }
     }
 
     public void messageAdminChatChannel(String message, boolean system)
     {
-        String chat_channel_id = ConfigEntry.DISCORD_ADMINCHAT_CHANNEL_ID.getString();
-
         String sanitizedMessage = sanitizeChatMessage(message);
-
         if (sanitizedMessage.isBlank()) return;
 
-        if (enabled && !chat_channel_id.isEmpty())
+        if (enabled)
         {
-            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).submit(true);
-            sentMessages.add(sentMessage);
+            if (adminChatMessageQueue.size() >= 5) {
+                adminChatMessageQueue.remove(0);
+            }
+
+            adminChatMessageQueue.add(sanitizedMessage);
         }
     }
 
@@ -534,7 +538,7 @@ public class Discord extends FreedomService
         if (!server.hasWhitelist()
                 && !plugin.pl.getPlayer(player).isMuted() && bot != null)
         {
-            messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message));
+            messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message), false);
         }
     }
 }

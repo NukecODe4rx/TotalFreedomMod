@@ -149,7 +149,7 @@ public class ChatManager extends FreedomService
     {
         Displayable display = plugin.rm.getDisplay(sender);
         FLog.info("[ADMIN] " + sender.getName() + " " + display.getTag() + ": " + message, true);
-        plugin.dc.messageAdminChatChannel(sender.getName() + " \u00BB " + message);
+        plugin.dc.messageAdminChatChannel(sender.getName() + " \u00BB " + message, false);
 
         server.getOnlinePlayers().stream().filter(player -> plugin.al.isAdmin(player)).forEach(player ->
         {

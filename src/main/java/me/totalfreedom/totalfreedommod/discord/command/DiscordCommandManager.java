@@ -68,9 +68,7 @@ public class DiscordCommandManager
                 {
                     final MessageCreateBuilder messageBuilder = command.execute(member, args);
                     final MessageCreateData message = messageBuilder.build();
-                    final CompletableFuture<Message> futureMessage = channel.sendMessage(message).submit(true);
-
-                    this.discord.sentMessages.add(futureMessage);
+                    channel.sendMessage(message).submit(true);
                 }
                 else
                 {
@@ -79,10 +77,7 @@ public class DiscordCommandManager
                     embedBuilder.setColor(Color.RED);
                     embedBuilder.setDescription("You don't have permission to execute this command.");
                     final MessageEmbed embed = embedBuilder.build();
-
-                    final CompletableFuture<Message> futureMessage = channel.sendMessage(MessageCreateData.fromEmbeds(embed)).submit(true);
-
-                    this.discord.sentMessages.add(futureMessage);
+                    channel.sendMessage(MessageCreateData.fromEmbeds(embed)).submit(true);
                 }
             }
         }
