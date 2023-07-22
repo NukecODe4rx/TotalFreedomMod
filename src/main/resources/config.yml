@@ -212,6 +212,7 @@ allow:
   gravity: false
   masterblocks: false
   books: true
+  item_drops: false
 
 blocked_commands:
   #

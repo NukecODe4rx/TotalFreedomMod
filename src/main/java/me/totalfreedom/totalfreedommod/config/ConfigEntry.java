@@ -35,6 +35,7 @@ public enum ConfigEntry
     ALLOW_GRAVITY(Boolean.class, "allow.gravity"),
     ALLOW_MASTERBLOCKS(Boolean.class, "allow.masterblocks"),
     ALLOW_BOOKS(Boolean.class, "allow.books"),
+    ALLOW_ITEM_DROPS(Boolean.class, "allow.item_drops"),
     //
     BLOCKED_CHATCODES(String.class, "blocked_chatcodes"),
     //
