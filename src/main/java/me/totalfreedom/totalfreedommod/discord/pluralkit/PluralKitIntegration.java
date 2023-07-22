@@ -58,6 +58,7 @@ public class PluralKitIntegration {
         final HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Accept", "application/json");
+        conn.setRequestProperty("User-Agent", "github.com/IPTFreedom/TotalFreedomMod (github.com/LunaWasFlaggedAgain; contact@esixtwo.one)");
         conn.setUseCaches(false);
         conn.setDoInput(true);
         conn.setDoOutput(true);
