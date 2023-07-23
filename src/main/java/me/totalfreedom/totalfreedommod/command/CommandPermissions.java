@@ -12,7 +12,5 @@ public @interface CommandPermissions
 
     SourceType source() default SourceType.BOTH;
 
-    boolean blockHostConsole() default false;
-
     int cooldown() default 0;
 }

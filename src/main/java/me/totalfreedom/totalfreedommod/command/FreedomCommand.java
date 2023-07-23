@@ -42,7 +42,6 @@ public abstract class FreedomCommand implements CommandExecutor, TabCompleter
     private final String aliases;
     private final Rank level;
     private final SourceType source;
-    private final boolean blockHostConsole;
     private final int cooldown;
     private final CommandParameters params;
     private final CommandPermissions perms;
@@ -58,7 +57,6 @@ public abstract class FreedomCommand implements CommandExecutor, TabCompleter
         this.aliases = params.aliases();
         this.level = perms.level();
         this.source = perms.source();
-        this.blockHostConsole = perms.blockHostConsole();
         this.cooldown = perms.cooldown();
     }
 
@@ -284,11 +282,6 @@ public abstract class FreedomCommand implements CommandExecutor, TabCompleter
         return source;
     }
 
-    public boolean isBlockHostConsole()
-    {
-        return blockHostConsole;
-    }
-
     public int getCooldown()
     {
         return cooldown;
@@ -376,11 +369,6 @@ public abstract class FreedomCommand implements CommandExecutor, TabCompleter
                 return true;
             }
 
-            if (perms.blockHostConsole() && (sender instanceof ConsoleCommandSender || (plugin.btb != null && plugin.btb.isTelnetSender(sender))))
-            {
-                msg(ChatColor.RED + "Host console is not allowed to use this command!");
-                return true;
-            }
             return false;
         }
 
