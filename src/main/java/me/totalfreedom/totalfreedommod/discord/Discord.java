@@ -514,16 +514,28 @@ public class Discord extends FreedomService
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent event)
+    public void onPlayerChat(Player player, String message)
     {
-        Player player = event.getPlayer();
-        String message = event.getMessage();
-
-        if (!ConfigEntry.ADMIN_ONLY_MODE.getBoolean() && !server.hasWhitelist()
-                && !plugin.pl.getPlayer(player).isMuted() && bot != null)
+        if (ConfigEntry.ADMIN_ONLY_MODE.getBoolean())
         {
-            messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message));
+            return;
         }
+
+        if (server.hasWhitelist())
+        {
+            return;
+        }
+
+        if (plugin.pl.getPlayer(player).isMuted())
+        {
+            return;
+        }
+
+        if (bot == null)
+        {
+            return;
+        }
+
+        messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message));
     }
 }
