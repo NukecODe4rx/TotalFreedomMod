@@ -1,7 +1,7 @@
 package me.totalfreedom.totalfreedommod;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -23,7 +23,7 @@ public class CommandSpy extends FreedomService
     {
         server.getOnlinePlayers().stream().filter(player -> plugin.al.isAdmin(player)
                 && plugin.al.getAdmin(player).getCommandSpy() && player != event.getPlayer()).forEach(player ->
-                player.sendMessage(Component.text(event.getPlayer().getName()).append(Component.text(": "))
-                        .append(Component.text(event.getMessage()))));
+                player.sendMessage(Component.text(event.getPlayer().getName(), NamedTextColor.GRAY).append(Component.text(": ", NamedTextColor.GRAY))
+                        .append(Component.text(event.getMessage(), NamedTextColor.GRAY))));
     }
 }
