@@ -19,7 +19,7 @@ import org.bukkit.plugin.Plugin;
 public class LibsDisguisesBridge extends FreedomService
 {
     private LibsDisguises libsDisguisesPlugin = null;
-    private boolean disguisesEnabled;
+    private boolean disguisesEnabled = true;
 
     @Override
     public void onStart()
