@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -144,10 +145,11 @@ public class FUtil
         return (count == 1 ? "" : "s");
     }
 
+    @SuppressWarnings("java:S6204")
     public static List<String> getPlayerList()
     {
         return getServer().getOnlinePlayers().stream().filter(player ->
-                !TotalFreedomMod.getPlugin().al.isVanished(player.getUniqueId())).map(HumanEntity::getName).toList();
+                !TotalFreedomMod.getPlugin().al.isVanished(player.getUniqueId())).map(HumanEntity::getName).collect(Collectors.toList());
     }
 
     public static String listToString(List<String> list)
