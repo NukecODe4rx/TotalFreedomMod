@@ -27,8 +27,7 @@ server:
     subtitle: '&eThe Original All-Op Server!'
 
   # All players who show up as owner
-  owners:
-    - Wild1145
+  owners: [ ]
 
   # All players who show up as executive
   executives: [ ]
@@ -436,6 +435,9 @@ blocked_commands:
     - slconfig
     - smite
     - nickfilter
+    - co
+    - core
+    - coreprotect
 
 # Words that cannot be used in tags
 forbidden_words:
