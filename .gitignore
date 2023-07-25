@@ -39,3 +39,6 @@ manifest.mf
 ehthumbs.db
 Thumbs.db
 .idea/inspectionProfiles/Project_Default.xml
+
+# Common working directory
+run/
