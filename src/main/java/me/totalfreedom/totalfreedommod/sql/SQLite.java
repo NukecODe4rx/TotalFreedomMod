@@ -90,6 +90,15 @@ public class SQLite extends FreedomService
                 {
                     FLog.severe("Failed to create the admins table: " + e.getMessage());
                 }
+            } else
+            {
+                try
+                {
+                    connection.createStatement().execute("ALTER TABLE `admins` DROP COLUMN `ptero_id`");
+                } catch (SQLException e)
+                {
+                    // Ignore the error. If someone else wants to add WORKING AND TESTED CODE to check if the `ptero_id` column exists, they can, but I couldn't find a good way.
+                }
             }
             if (tableExists(meta, "players"))
             {
