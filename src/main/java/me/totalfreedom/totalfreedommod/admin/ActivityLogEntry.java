@@ -66,8 +66,13 @@ public class ActivityLogEntry implements IConfig
 
     public void addLogin()
     {
-        Date currentTime = Date.from(Instant.now());
-        timestamps.add("Login: " + FUtil.dateToString(currentTime));
+        this.addLogin(System.currentTimeMillis());
+    }
+
+    public void addLogin(final long timestamp)
+    {
+        Date time = Date.from(Instant.ofEpochMilli(timestamp));
+        timestamps.add("Login: " + FUtil.dateToString(time));
     }
 
     public void addLogout()

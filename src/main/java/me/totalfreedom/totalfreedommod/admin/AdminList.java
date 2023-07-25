@@ -194,6 +194,15 @@ public class AdminList extends FreedomService
         // Save admin
         plugin.sql.addAdmin(admin);
 
+        // Add login time
+        UUID uuid = admin.getUuid();
+        Player player = Bukkit.getPlayer(uuid);
+
+        if (player != null)
+        {
+            plugin.acl.getActivityLog(player).addLogin(player.getLastLogin());
+        }
+
         return true;
     }
 
