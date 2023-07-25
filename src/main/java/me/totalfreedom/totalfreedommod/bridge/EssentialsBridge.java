@@ -6,7 +6,6 @@ import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.player.FPlayer;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FLog;
-import me.totalfreedom.totalfreedommod.util.FUtil;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,7 +13,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
@@ -129,7 +127,7 @@ public class EssentialsBridge extends FreedomService
         try
         {
             User user = getEssentialsUser(username);
-            if (user != null)
+            if (user != null && user.getBase().isOnline())
             {
                 user.setVanished(vanished);
             }
@@ -202,13 +200,6 @@ public class EssentialsBridge extends FreedomService
                 }
             }.runTaskLater(plugin, 20L);
         }
-    }
-
-    // TODO: Actually use this for something or remove it.
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerQuit(PlayerQuitEvent event)
-    {
-        Player player = event.getPlayer();
     }
 
     public boolean isEnabled()

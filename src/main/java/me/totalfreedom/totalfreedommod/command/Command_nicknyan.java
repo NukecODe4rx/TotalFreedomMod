@@ -2,20 +2,25 @@ package me.totalfreedom.totalfreedommod.command;
 
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import java.util.Arrays;
 
 @CommandPermissions(level = Rank.OP, source = SourceType.ONLY_IN_GAME)
 @CommandParameters(description = "Essentials Interface Command - Randomize the colors of your nickname.", usage = "/<command> <<nick> | off>")
 public class Command_nicknyan extends FreedomCommand
 {
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
+        if (!server.getPluginManager().isPluginEnabled("Essentials"))
+        {
+            msg("Essentials is not enabled on this server.");
+            return true;
+        }
+
         if (args.length != 1)
         {
             return false;
@@ -41,32 +46,24 @@ public class Command_nicknyan extends FreedomCommand
             return true;
         }
 
-        for (Player player : Bukkit.getOnlinePlayers())
+
+        if (server.getOnlinePlayers().stream().anyMatch(player -> player != playerSender
+                && (player.getName().equalsIgnoreCase(nickPlain)
+                || ChatColor.stripColor(plugin.esb.getNickname(player.getName())).trim().equalsIgnoreCase(nickPlain))))
         {
-            if (player == playerSender)
-            {
-                continue;
-            }
-            if (player.getName().equalsIgnoreCase(nickPlain) || ChatColor.stripColor(player.getDisplayName()).trim().equalsIgnoreCase(nickPlain))
-            {
-                msg("That nickname is already in use.");
-                return true;
-            }
+            msg("That nickname is already in use.");
+            return true;
         }
 
         final StringBuilder newNick = new StringBuilder();
-
-        final char[] chars = nickPlain.toCharArray();
-        for (char c : chars)
-        {
-            newNick.append(FUtil.randomChatColor()).append(c);
-        }
+        Arrays.stream(nickPlain.chars().toArray()).forEach(character -> newNick.append(FUtil.randomChatColor())
+                .append(Character.toString(character)));
 
         newNick.append(ChatColor.WHITE);
 
         plugin.esb.setNickname(sender.getName(), newNick.toString());
 
-        msg("Your nickname is now: " + newNick.toString());
+        msg("Your nickname is now: " + newNick);
         return true;
     }
 }

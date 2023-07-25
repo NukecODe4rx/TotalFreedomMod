@@ -1,7 +1,6 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import java.util.List;
-
+import java.util.Optional;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,10 +14,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @CommandPermissions(level = Rank.NON_OP, source = SourceType.BOTH)
-@CommandParameters(description = "Set the on/off state of the lever at position x, y, z in world 'worldname'.", usage = "/<command> <x> <y> <z> <worldname> <on|off>")
+@CommandParameters(description = "Set the on/off state of the lever at position x, y, z in world 'worldname'.", usage = "/<command> <x> <y> <z> <worldname> <on | off>")
 public class Command_setlever extends FreedomCommand
 {
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
@@ -33,50 +31,38 @@ public class Command_setlever extends FreedomCommand
             x = Double.parseDouble(args[0]);
             y = Double.parseDouble(args[1]);
             z = Double.parseDouble(args[2]);
+
+            // Shows the "Invalid coordinates" message without having to do boilerplate bullshit
+            if (Math.abs(x) > 29999998 || Math.abs(y) > 29999998 || Math.abs(z) > 29999998)
+            {
+                throw new IllegalArgumentException();
+            }
         }
-        catch (NumberFormatException ex)
+        catch (IllegalArgumentException ex)
         {
             msg("Invalid coordinates.");
             return true;
         }
 
-        if (x > 29999998 || x < -29999998 || y > 29999998 || y < -29999998 || z > 29999998 || z < -29999998)
+        Optional<World> optionalWorld = server.getWorlds().stream().filter(world ->
+                world.getName().equalsIgnoreCase(args[3])).findAny();
+
+        if (optionalWorld.isEmpty())
         {
-            msg("Coordinates cannot be larger than 29999998 or smaller than -29999998 blocks.");
+            msg("Invalid world: " + args[3]);
             return true;
         }
 
-        World world = null;
-        final String needleWorldName = args[3].trim();
-        final List<World> worlds = server.getWorlds();
-        for (final World testWorld : worlds)
-        {
-            if (testWorld.getName().trim().equalsIgnoreCase(needleWorldName))
-            {
-                world = testWorld;
-                break;
-            }
-        }
-
-        if (world == null)
-        {
-            msg("Invalid world name.");
-            return true;
-        }
-
-        final Location leverLocation = new Location(world, x, y, z);
-
-        final boolean leverOn = (args[4].trim().equalsIgnoreCase("on") || args[4].trim().equalsIgnoreCase("1"));
-
+        final Location leverLocation = new Location(optionalWorld.get(), x, y, z);
         final Block targetBlock = leverLocation.getBlock();
 
         if (targetBlock.getType() == Material.LEVER)
         {
             BlockState state = targetBlock.getState();
             BlockData data = state.getBlockData();
-            Switch caster = (Switch)data;
+            Switch caster = (Switch) data;
 
-            caster.setPowered(leverOn);
+            caster.setPowered(args[4].trim().equalsIgnoreCase("on") || args[4].trim().equalsIgnoreCase("1"));
             state.setBlockData(data);
             state.update();
 
@@ -84,8 +70,7 @@ public class Command_setlever extends FreedomCommand
         }
         else
         {
-            msg("Target block " + targetBlock + "  is not a lever.");
-            return true;
+            msg("That block isn't a lever.");
         }
 
         return true;

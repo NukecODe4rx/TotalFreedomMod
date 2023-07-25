@@ -81,6 +81,6 @@ public class HelpCommand extends DiscordCommandImpl
             embedBuilder.addField(category, fieldValue.toString().trim(), false);
         }
 
-        return new MessageBuilder().setEmbed(embedBuilder.build());
+        return new MessageBuilder().setEmbeds(embedBuilder.build());
     }
 }

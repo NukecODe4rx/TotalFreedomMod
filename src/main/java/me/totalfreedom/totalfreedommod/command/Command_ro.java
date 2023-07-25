@@ -5,6 +5,7 @@ import java.util.List;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import me.totalfreedom.totalfreedommod.util.Groups;
+import net.coreprotect.CoreProtectAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -22,7 +23,7 @@ import org.bukkit.entity.Player;
 public class Command_ro extends FreedomCommand
 {
 
-    public static int replaceBlocks(Location center, Material fromMaterial, Material toMaterial, int radius)
+    private int removeBlocks(Location center, Material material, int radius, String user)
     {
         int affected = 0;
 
@@ -35,11 +36,17 @@ public class Command_ro extends FreedomCommand
                 {
                     Block block = centerBlock.getRelative(xOffset, yOffset, zOffset);
                     BlockData data = block.getBlockData();
+                    CoreProtectAPI cpAPI = plugin.cpb.getCoreProtectAPI();
+
                     if (block.getLocation().distanceSquared(center) < (radius * radius))
                     {
-                        if (fromMaterial.equals(Material.WATER) && data instanceof Waterlogged)
+                        if (material.equals(Material.WATER) && data instanceof Waterlogged waterloggedData)
                         {
-                            Waterlogged waterloggedData = (Waterlogged)data;
+                            if (cpAPI != null)
+                            {
+                                cpAPI.logRemoval(user, block.getLocation(), material, data);
+                            }
+
                             if (waterloggedData.isWaterlogged())
                             {
                                 waterloggedData.setWaterlogged(false);
@@ -47,12 +54,18 @@ public class Command_ro extends FreedomCommand
                                 affected++;
                                 continue;
                             }
-                            block.setType(toMaterial);
+
+                            block.setType(Material.AIR);
                             affected++;
                         }
-                        else if (block.getType().equals(fromMaterial))
+                        else if (block.getType().equals(material))
                         {
-                            block.setType(toMaterial);
+                            if (cpAPI != null)
+                            {
+                                cpAPI.logRemoval(user, block.getLocation(), material, data);
+                            }
+
+                            block.setType(Material.AIR);
                             affected++;
                         }
                     }
@@ -155,7 +168,7 @@ public class Command_ro extends FreedomCommand
 
                 for (final Material material : materials)
                 {
-                    affected += replaceBlocks(player.getLocation(), material, Material.AIR, radius);
+                    affected += removeBlocks(player.getLocation(), material, radius, sender.getName());
                 }
             }
         }
@@ -166,7 +179,7 @@ public class Command_ro extends FreedomCommand
                 FUtil.adminAction(sender.getName(), "Removing all " + names + " within " + radius + " blocks of " + targetPlayer.getName(), false);
                 for (Material material : materials)
                 {
-                    affected += replaceBlocks(targetPlayer.getLocation(), material, Material.AIR, radius);
+                    affected += removeBlocks(targetPlayer.getLocation(), material, radius, sender.getName());
                 }
             }
         }

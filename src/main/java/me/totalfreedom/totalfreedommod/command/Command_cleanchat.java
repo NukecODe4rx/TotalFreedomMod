@@ -10,20 +10,17 @@ import org.bukkit.entity.Player;
 @CommandParameters(description = "Clears the chat.", usage = "/<command>", aliases = "cc")
 public class Command_cleanchat extends FreedomCommand
 {
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
-        for (Player player : server.getOnlinePlayers())
+        server.getOnlinePlayers().stream().filter(player -> !plugin.al.isAdmin(player)).forEach(player ->
         {
-            if (!plugin.al.isAdmin(player))
+            for (int i = 0; i < 100; i++)
             {
-                for (int i = 0; i < 100; i++)
-                {
-                    msg(player, "");
-                }
+                msg(player, "");
             }
-        }
+        });
+
         FUtil.adminAction(sender.getName(), "Cleared chat", true);
         return true;
     }

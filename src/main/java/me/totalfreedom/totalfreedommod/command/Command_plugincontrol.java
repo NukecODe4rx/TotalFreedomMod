@@ -1,9 +1,6 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -17,116 +14,109 @@ import org.bukkit.plugin.PluginManager;
 @CommandParameters(description = "Enable, disable, or reload a specified plugin, as well as list all plugins on the server.", usage = "/<command> <<enable | disable | reload> <pluginname>> | list>", aliases = "plc")
 public class Command_plugincontrol extends FreedomCommand
 {
-
     private final List<String> UNTOUCHABLE_PLUGINS = Arrays.asList(plugin.getName());
 
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
-        if (args.length == 0 || args.length > 2)
-        {
-            return false;
-        }
-
         final PluginManager pm = server.getPluginManager();
 
-        if (args.length == 1)
+        /* This is the way it is because there was too much "if the arguments aren't enough then return false" in the
+        *   original code in addition to the stupid amount of "if something isn't right then do some boilerplate stuff
+        *   then return true". Codacy complained, so I aggressively optimized this to keep it quiet. */
+        switch (args.length)
         {
-            if (args[0].equalsIgnoreCase("list"))
+            case 1 ->
             {
-                for (Plugin serverPlugin : pm.getPlugins())
+                if (args[0].equalsIgnoreCase("list"))
                 {
-                    final String version = serverPlugin.getDescription().getVersion();
-                    msg(ChatColor.GRAY + "- " + (serverPlugin.isEnabled() ? ChatColor.GREEN : ChatColor.RED) + serverPlugin.getName()
-                            + ChatColor.GOLD + (!version.isEmpty() ? " v" + version : "") + " by "
-                            + StringUtils.join(serverPlugin.getDescription().getAuthors(), ", "));
+                    Arrays.stream(pm.getPlugins()).forEach(pl ->
+                    {
+                        final String version = pl.getDescription().getVersion();
+                        msg(ChatColor.GRAY + "- " + (pl.isEnabled() ? ChatColor.GREEN : ChatColor.RED) + pl.getName()
+                                + ChatColor.GOLD + (!version.isEmpty() ? " v" + version : "") + " by "
+                                + StringUtils.join(pl.getDescription().getAuthors(), ", "));
+                    });
+
+                    return true;
                 }
-
-                return true;
             }
-
-            return false;
-        }
-
-        if (args[0].equals("enable"))
-        {
-            final Plugin target = getPlugin(args[1]);
-            if (target == null)
+            case 2 ->
             {
-                msg("Plugin not found!");
-                return true;
-            }
+                Plugin pl = pm.getPlugin(args[1]);
 
-            if (target.isEnabled())
+                if (pl != null)
+                {
+                    switch (args[0].toLowerCase())
+                    {
+                        case "enable" ->
+                        {
+                            if (pl.isEnabled())
+                            {
+                                msg(pl.getName() + " is already enabled.");
+                                return true;
+                            }
+
+                            pm.enablePlugin(pl);
+
+                            if (pl.isEnabled())
+                            {
+                                msg(pl.getName() + " is now enabled.");
+                            }
+                            else
+                            {
+                                msg("An error occurred whilst attempting to enable " + pl.getName() + ".");
+                            }
+                            return true;
+                        }
+                        case "disable" ->
+                        {
+                            if (!pl.isEnabled())
+                            {
+                                msg(pl.getName() + " is already disabled.");
+                                return true;
+                            }
+                            else if (UNTOUCHABLE_PLUGINS.contains(pl.getName()))
+                            {
+                                msg(pl.getName() + " can't be disabled.");
+                                return true;
+                            }
+
+                            pm.disablePlugin(pl);
+
+                            msg(pl.getName() + " is now disabled.");
+                            return true;
+                        }
+                        case "reload" ->
+                        {
+                            if (UNTOUCHABLE_PLUGINS.contains(pl.getName()))
+                            {
+                                msg(pl.getName() + " can't be reloaded.");
+                                return true;
+                            }
+
+                            pm.disablePlugin(pl);
+                            pm.enablePlugin(pl);
+
+                            msg(pl.getName() + " has been reloaded.");
+                            return true;
+                        }
+                        default ->
+                        {
+                            // Do nothing. This is here to please Codacy.
+                        }
+                    }
+                }
+                else
+                {
+                    msg("Plugin not found!");
+                    return true;
+                }
+            }
+            default ->
             {
-                msg("Plugin is already enabled.");
-                return true;
+                // Ditto
             }
-
-            pm.enablePlugin(target);
-
-            if (!pm.isPluginEnabled(target))
-            {
-                msg("Error enabling plugin " + target.getName());
-                return true;
-            }
-
-            msg(target.getName() + " is now enabled.");
-            return true;
-        }
-
-        if (args[0].equals("disable"))
-        {
-            final Plugin target = getPlugin(args[1]);
-            if (target == null)
-            {
-                msg("Plugin not found!");
-                return true;
-            }
-
-            if (!target.isEnabled())
-            {
-                msg("Plugin is already disabled.");
-                return true;
-            }
-
-            if (UNTOUCHABLE_PLUGINS.contains(target.getName()))
-            {
-                msg("You cannot disable " + target.getName());
-                return true;
-            }
-
-            pm.disablePlugin(target);
-
-            if (pm.isPluginEnabled(target))
-            {
-                msg("Error disabling plugin " + target.getName());
-                return true;
-            }
-
-            msg(target.getName() + " is now disabled.");
-            return true;
-        }
-
-        if (args[0].equals("reload"))
-        {
-            final Plugin target = getPlugin(args[1]);
-            if (target == null)
-            {
-                msg("Plugin not found!");
-                return true;
-            }
-
-            if (UNTOUCHABLE_PLUGINS.contains(target.getName()))
-            {
-                msg("You cannot reload " + target.getName());
-                return true;
-            }
-
-            pm.disablePlugin(target);
-            pm.enablePlugin(target);
-            msg(target.getName() + " reloaded.");
-            return true;
         }
 
         return false;
@@ -143,51 +133,12 @@ public class Command_plugincontrol extends FreedomCommand
         {
             return Arrays.asList("enable", "disable", "reload", "list");
         }
-        else if (args.length == 2)
+        else if (args.length == 2 && !args[0].equalsIgnoreCase("list"))
         {
-            if (!args[0].equals("list"))
-            {
-                return getAllPluginNames();
-            }
+            return Arrays.stream(server.getPluginManager().getPlugins()).map(Plugin::getName)
+                    .filter(pl -> !UNTOUCHABLE_PLUGINS.contains(pl)).toList();
         }
 
         return Collections.emptyList();
-    }
-
-    public List<String> getAllPluginNames()
-    {
-        List<String> names = new ArrayList<>();
-        for (Plugin plugin : server.getPluginManager().getPlugins())
-        {
-            if (!UNTOUCHABLE_PLUGINS.contains(plugin.getName()))
-            {
-                names.add(plugin.getName());
-            }
-        }
-        names.remove(plugin.getName());
-        return names;
-    }
-
-    public Plugin getPlugin(String name)
-    {
-        for (Plugin serverPlugin : server.getPluginManager().getPlugins())
-        {
-            if (serverPlugin.getName().equalsIgnoreCase(name))
-            {
-                return serverPlugin;
-            }
-        }
-
-        if (name.length() >= 3)
-        {
-            for (Plugin serverPlugin : server.getPluginManager().getPlugins())
-            {
-                if (serverPlugin.getName().toLowerCase().contains(name.toLowerCase()))
-                {
-                    return serverPlugin;
-                }
-            }
-        }
-        return null;
     }
 }

@@ -21,12 +21,7 @@ public class Command_denick extends FreedomCommand
         }
 
         FUtil.adminAction(sender.getName(), "Removing all nicknames", false);
-
-        for (Player player : server.getOnlinePlayers())
-        {
-            plugin.esb.setNickname(player.getName(), null);
-        }
-
+        server.getOnlinePlayers().forEach(player -> plugin.esb.setNickname(player.getName(), null));
         return true;
     }
 }

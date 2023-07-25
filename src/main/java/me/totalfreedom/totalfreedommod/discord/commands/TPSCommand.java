@@ -1,13 +1,11 @@
 package me.totalfreedom.totalfreedommod.discord.commands;
 
-import me.totalfreedom.totalfreedommod.discord.command.DiscordCommand;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandImpl;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +53,6 @@ public class TPSCommand extends DiscordCommandImpl
         builder.addField("Allocated Memory", Math.ceil(FUtil.getTotalMem()) + " MB", false);
         builder.addField("Free Memory", Math.ceil(FUtil.getFreeMem()) + " MB", false);
 
-        return new MessageBuilder().setEmbed(builder.build());
+        return new MessageBuilder().setEmbeds(builder.build());
     }
 }

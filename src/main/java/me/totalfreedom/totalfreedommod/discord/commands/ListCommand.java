@@ -3,16 +3,14 @@ package me.totalfreedom.totalfreedommod.discord.commands;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.admin.AdminList;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
-import me.totalfreedom.totalfreedommod.discord.command.DiscordCommand;
+import me.totalfreedom.totalfreedommod.discord.Discord;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandImpl;
 import me.totalfreedom.totalfreedommod.rank.Displayable;
 import me.totalfreedom.totalfreedommod.rank.RankManager;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -72,25 +70,20 @@ public class ListCommand extends DiscordCommandImpl
 
         Map<Displayable, List<String>> displayables = new HashMap<>();
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+        Bukkit.getOnlinePlayers().stream().filter(player -> !adminList.isVanished(player.getUniqueId())).forEach(player ->
         {
-            if (adminList.isVanished(onlinePlayer.getName()))
-            {
-                continue;
-            }
-
-
-            Displayable displayable = rankManager.getDisplay(onlinePlayer);
+            final Displayable displayable = rankManager.getDisplay(player);
+            final String name = Discord.deformat(player.getName());
 
             if (displayables.containsKey(displayable))
             {
-                displayables.get(displayable).add(onlinePlayer.getName());
+                displayables.get(displayable).add(name);
             }
             else
             {
-                displayables.put(displayable, new ArrayList<>(List.of(onlinePlayer.getName())));
+                displayables.put(displayable, new ArrayList<>(List.of(name)));
             }
-        }
+        });
 
         for (Map.Entry<Displayable, List<String>> entry : displayables.entrySet())
         {
@@ -101,6 +94,6 @@ public class ListCommand extends DiscordCommandImpl
                     String.join(", ", players), false);
         }
 
-        return new MessageBuilder().setEmbed(embedBuilder.build());
+        return new MessageBuilder().setEmbeds(embedBuilder.build());
     }
 }

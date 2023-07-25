@@ -4,6 +4,7 @@ import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.util.Groups;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
@@ -26,7 +27,7 @@ public class InteractBlocker extends FreedomService
     {
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event)
     {
         switch (event.getAction())
@@ -69,24 +70,21 @@ public class InteractBlocker extends FreedomService
     private void handleRightClick(PlayerInteractEvent event)
     {
         final Player player = event.getPlayer();
+        if (player.getGameMode().equals(GameMode.SPECTATOR)) {
+            return;
+        }
 
-        if (event.getClickedBlock() != null)
+        final Block clickedBlock = event.getClickedBlock();
+
+        if (clickedBlock != null && clickedBlock.getType() == Material.RESPAWN_ANCHOR && !ConfigEntry.ALLOW_RESPAWN_ANCHORS.getBoolean())
         {
-            if (event.getClickedBlock().getType().equals(Material.STRUCTURE_BLOCK) || event.getClickedBlock().getType().equals(Material.JIGSAW) || event.getClickedBlock().getType().equals(Material.RESPAWN_ANCHOR))
-            {
-                event.setCancelled(true);
-                event.getPlayer().closeInventory();
-            }
+            event.setCancelled(true);
+            return;
         }
 
         if (Groups.SPAWN_EGGS.contains(event.getMaterial()))
         {
             event.setCancelled(true);
-            Block clickedBlock = event.getClickedBlock();
-            if (clickedBlock == null)
-            {
-                return;
-            }
             EntityType eggType = null;
             try
             {
@@ -104,7 +102,7 @@ public class InteractBlocker extends FreedomService
             {
                 //
             }
-            if (eggType != null)
+            if (eggType != null && clickedBlock != null)
             {
                 clickedBlock.getWorld().spawnEntity(clickedBlock.getLocation().add(event.getBlockFace().getDirection()).add(0.5, 0.5, 0.5), eggType);
             }
@@ -178,6 +176,11 @@ public class InteractBlocker extends FreedomService
             }
             case WRITTEN_BOOK:
             {
+                if (ConfigEntry.ALLOW_BOOKS.getBoolean())
+                {
+                    break;
+                }
+
                 player.getInventory().clear(player.getInventory().getHeldItemSlot());
                 player.sendMessage(ChatColor.GRAY + "Books are currently disabled.");
                 event.setCancelled(true);

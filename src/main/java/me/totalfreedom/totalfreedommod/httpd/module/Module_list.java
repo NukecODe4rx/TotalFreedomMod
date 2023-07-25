@@ -37,7 +37,7 @@ public class Module_list extends HTTPDModule
 
             for (Player player : Bukkit.getOnlinePlayers())
             {
-                if (plugin.al.isVanished(player.getName()))
+                if (plugin.al.isVanished(player.getUniqueId()))
                 {
                     continue;
                 }
@@ -67,7 +67,7 @@ public class Module_list extends HTTPDModule
                     operators.add(player.getName());
                 }
 
-                if (hasSpecialTitle(player) && plugin.al.isAdmin(player) && !plugin.al.isVanished(player.getName()))
+                if (hasSpecialTitle(player) && plugin.al.isAdmin(player) && !plugin.al.isVanished(player.getUniqueId()))
                 {
                     Admin admin = plugin.al.getAdmin(player);
                     switch (admin.getRank())
@@ -112,21 +112,13 @@ public class Module_list extends HTTPDModule
 
             final Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
-            int count = onlinePlayers.size() - AdminList.vanished.size();
-            body.append("<p>There are ").append(count < 0 ? 0 : count).append("/")
+            body.append("<p>There are ").append(FUtil.getFakePlayerCount()).append("/")
                     .append(Bukkit.getMaxPlayers()).append(" players online:</p>\r\n");
 
             body.append("<ul>\r\n");
 
-            for (Player player : onlinePlayers)
-            {
-                if (plugin.al.isVanished(player.getName()))
-                {
-                    continue;
-                }
-                String tag = plugin.rm.getDisplay(player).getTag();
-                body.append("<li>").append(tag).append(player.getName()).append("</li>\r\n");
-            }
+            onlinePlayers.stream().filter(player -> !plugin.al.isVanished(player.getUniqueId())).forEach(player ->
+                    body.append("<li>").append(plugin.rm.getDisplay(player).getTag()).append(player.getName()).append("</li>\r\n"));
 
             body.append("</ul>\r\n");
 

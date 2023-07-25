@@ -1,10 +1,6 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import me.totalfreedom.totalfreedommod.player.FPlayer;
+import java.util.*;
 import me.totalfreedom.totalfreedommod.punishments.Punishment;
 import me.totalfreedom.totalfreedommod.punishments.PunishmentType;
 import me.totalfreedom.totalfreedommod.rank.Rank;
@@ -20,7 +16,6 @@ import org.bukkit.entity.Player;
 @CommandParameters(description = "Mutes a player with brute force.", usage = "/<command> <[-s | -q] <player> [reason] | list | purge | all>", aliases = "stfu")
 public class Command_mute extends FreedomCommand
 {
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
@@ -29,134 +24,110 @@ public class Command_mute extends FreedomCommand
             return false;
         }
 
-        if (args[0].equalsIgnoreCase("list"))
+        switch (args[0].toLowerCase())
         {
-            msg("Muted players:");
-            FPlayer info;
-            int count = 0;
-            for (Player mp : server.getOnlinePlayers())
+            case "list" ->
             {
-                info = plugin.pl.getPlayer(mp);
-                if (info.isMuted())
+                msg("Muted players:");
+                List<? extends Player> list = server.getOnlinePlayers().stream().filter(player ->
+                        plugin.pl.getPlayer(player).isMuted()).toList();
+
+                if (list.size() > 0)
+                    list.forEach(player -> msg("- " + player.getName()));
+                else
+                    msg("- none");
+            }
+            case "purge" ->
+            {
+                FUtil.adminAction(sender.getName(), "Unmuting all players", true);
+                List<? extends Player> list = server.getOnlinePlayers().stream().filter(player ->
+                        plugin.pl.getPlayer(player).isMuted()).toList();
+
+                list.forEach(player ->
                 {
-                    msg("- " + mp.getName());
-                    count++;
-                }
-            }
-            if (count == 0)
-            {
-                msg("- none");
-            }
+                    plugin.pl.getPlayer(player).setMuted(false);
+                    player.sendTitle(ChatColor.RED + "You have been unmuted.",
+                            ChatColor.YELLOW + "Be sure to follow the rules!", 20, 100, 60);
+                });
 
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("purge"))
-        {
-            FUtil.adminAction(sender.getName(), "Unmuting all players.", true);
-            FPlayer info;
-            int count = 0;
-            for (Player mp : server.getOnlinePlayers())
+                msg("Unmuted " + list.size() + " player" + (list.size() != 1 ? "s" : "") + ".");
+            }
+            case "all" ->
             {
-                info = plugin.pl.getPlayer(mp);
-                if (info.isMuted())
+                FUtil.adminAction(sender.getName(), "Muting all non-admins", true);
+                List<? extends Player> list = server.getOnlinePlayers().stream().filter(player ->
+                        !plugin.al.isAdmin(player)).toList();
+
+                list.forEach(player ->
                 {
-                    info.setMuted(false);
-                    mp.sendTitle(ChatColor.RED + "You've been unmuted.", ChatColor.YELLOW + "Be sure to follow the rules!", 20, 100, 60);
-                    count++;
-                }
+                    plugin.pl.getPlayer(player).setMuted(true);
+                    player.sendTitle(ChatColor.RED + "You've been muted globally.",
+                            ChatColor.YELLOW + "Please be patient and you will be unmuted shortly.", 20, 100, 60);
+                });
+
+                msg("Muted " + list.size() + " player" + (list.size() != 1 ? "s" : "") + ".");
             }
-            plugin.mu.MUTED_PLAYERS.clear();
-            msg("Unmuted " + count + " players.");
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("all"))
-        {
-            FUtil.adminAction(sender.getName(), "Muting all non-admins", true);
-
-            FPlayer playerdata;
-            int counter = 0;
-            for (Player player : server.getOnlinePlayers())
+            default ->
             {
-                if (!plugin.al.isAdmin(player))
+                boolean quiet = args[0].equalsIgnoreCase("-q");
+                boolean smite = args[0].equalsIgnoreCase("-s");
+
+                // Handling the -q parameter
+                if (quiet || smite)
                 {
-                    player.sendTitle(ChatColor.RED + "You've been muted globally.", ChatColor.YELLOW + "Please be patient and you will be unmuted shortly.", 20, 100, 60);
-                    playerdata = plugin.pl.getPlayer(player);
-                    playerdata.setMuted(true);
-                    counter++;
+                    if (args.length == 1) return false;
+                    args = ArrayUtils.subarray(args, 1, args.length);
                 }
+
+                // Handling the (optional) reason
+                String reason = args.length > 1 ? StringUtils.join(args, " ", 1, args.length) : null;
+
+                // Showtime
+                Optional.ofNullable(getPlayer(args[0])).ifPresentOrElse(player ->
+                {
+                    if (plugin.al.isAdmin(player))
+                    {
+                        msg(player.getName() + " is an admin, and as such can't be muted.", ChatColor.RED);
+                        return;
+                    }
+                    else if (plugin.pl.getPlayer(player).isMuted())
+                    {
+                        msg(player.getName() + " is already muted.", ChatColor.RED);
+                        return;
+                    }
+
+                    // Don't broadcast the mute if it was quiet
+                    if (!quiet)
+                    {
+                        FUtil.adminAction(sender.getName(), "Muting " + player.getName(), true);
+                    }
+
+                    // Smite the player if we're supposed to
+                    if (smite)
+                    {
+                        Command_smite.smite(sender, player, reason, true, false);
+                    }
+
+                    // Mutes the player
+                    plugin.pl.getPlayer(player).setMuted(true);
+
+                    // Notify the player that they have been muted
+                    player.sendTitle(ChatColor.RED + "You've been muted.",
+                            ChatColor.YELLOW + "Be sure to follow the rules!", 20, 100, 60);
+                    msg(player, "You have been muted by " + ChatColor.YELLOW + sender.getName()
+                            + ChatColor.RED + ".", ChatColor.RED);
+
+                    // Give them the reason if one is present.
+                    if (reason != null)
+                    {
+                        msg(player, "Reason: " + ChatColor.YELLOW + reason, ChatColor.RED);
+                    }
+
+                    msg((quiet ? "Quietly m" : "M") + "uted " + player.getName() + ".");
+                    plugin.pul.logPunishment(new Punishment(player.getName(), FUtil.getIp(player), sender.getName(),
+                            PunishmentType.MUTE, reason));
+                }, () -> msg(PLAYER_NOT_FOUND));
             }
-
-            msg("Muted " + counter + " players.");
-            return true;
-        }
-
-        // -s option (smite)
-        boolean smite = args[0].equals("-s");
-        // -q option (shadowmute)
-        boolean quiet = args[0].equals("-q");
-        if (smite || quiet)
-        {
-            args = ArrayUtils.subarray(args, 1, args.length);
-
-            if (args.length < 1)
-            {
-                return false;
-            }
-        }
-
-        final Player player = getPlayer(args[0]);
-        if (player == null)
-        {
-            msg(PLAYER_NOT_FOUND);
-            return true;
-        }
-
-        String reason = null;
-        if (args.length > 1)
-        {
-            reason = StringUtils.join(args, " ", 1, args.length);
-        }
-
-        FPlayer playerdata = plugin.pl.getPlayer(player);
-        if (plugin.al.isAdmin(player))
-        {
-            msg(player.getName() + " is an admin, and can't be muted.");
-            return true;
-        }
-
-        if (!playerdata.isMuted())
-        {
-            playerdata.setMuted(true);
-            player.sendTitle(ChatColor.RED + "You've been muted.", ChatColor.YELLOW + "Be sure to follow the rules!", 20, 100, 60);
-            
-            if (quiet)
-            {
-                msg("Muted " + player.getName() + " quietly");
-                return true;  // doesn't announce reason
-            }
-
-            FUtil.adminAction(sender.getName(), "Muting " + player.getName(), true);
-            
-            if (reason != null)
-            {
-                msg(player, ChatColor.RED + "Reason: " + ChatColor.YELLOW + reason);
-            }
-
-            if (smite)
-            {
-                Command_smite.smite(sender, player, reason);
-            }
-
-            msg(player, "You have been muted by " + ChatColor.YELLOW + sender.getName(), ChatColor.RED);
-            msg("Muted " + player.getName());
-
-            plugin.pul.logPunishment(new Punishment(player.getName(), FUtil.getIp(player), sender.getName(), PunishmentType.MUTE, reason));
-        }
-        else
-        {
-            msg(ChatColor.RED + "That player is already muted.");
         }
 
         return true;

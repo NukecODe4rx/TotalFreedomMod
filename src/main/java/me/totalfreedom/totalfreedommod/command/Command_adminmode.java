@@ -6,6 +6,7 @@ import java.util.List;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,13 +34,8 @@ public class Command_adminmode extends FreedomCommand
         {
             ConfigEntry.ADMIN_ONLY_MODE.setBoolean(true);
             FUtil.adminAction(sender.getName(), "Closing the server to non-admins", true);
-            for (Player player : server.getOnlinePlayers())
-            {
-                if (!isAdmin(player))
-                {
-                    player.kickPlayer("Server is now closed to non-admins.");
-                }
-            }
+            server.getOnlinePlayers().stream().filter(player -> !isAdmin(player)).forEach(player ->
+                    player.kick(Component.text("The server is now closed to non-admins.")));
             return true;
         }
 

@@ -10,13 +10,12 @@ import org.bukkit.entity.Player;
 @CommandParameters(description = "OP everyone on the server.", usage = "/<command>")
 public class Command_opall extends FreedomCommand
 {
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
         FUtil.adminAction(sender.getName(), "Opping all players on the server", false);
 
-        for (Player player : server.getOnlinePlayers())
+        server.getOnlinePlayers().forEach(player ->
         {
             if (!player.isOp())
             {
@@ -28,7 +27,7 @@ public class Command_opall extends FreedomCommand
             {
                 player.recalculatePermissions();
             }
-        }
+        });
 
         return true;
     }

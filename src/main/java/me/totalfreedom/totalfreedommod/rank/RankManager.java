@@ -193,12 +193,10 @@ public class RankManager extends FreedomService
         }
 
         // Broadcast login message
-        if (isAdmin || FUtil.isDeveloper(player) || plugin.pl.getData(player).isMasterBuilder() || plugin.pl.getData(player).hasLoginMessage())
+        if ((isAdmin || FUtil.isDeveloper(player) || plugin.pl.getData(player).isMasterBuilder()
+                || plugin.pl.getData(player).hasLoginMessage()) && !plugin.al.isVanished(player.getUniqueId()))
         {
-            if (!plugin.al.isVanished(player.getName()))
-            {
-                FUtil.bcastMsg(craftLoginMessage(player, null));
-            }
+            FUtil.bcastMsg(craftLoginMessage(player, null));
         }
 
         // Set display

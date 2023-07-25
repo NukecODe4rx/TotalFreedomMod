@@ -1,9 +1,6 @@
 package me.totalfreedom.totalfreedommod.command;
 
 import me.totalfreedom.totalfreedommod.admin.Admin;
-import me.totalfreedom.totalfreedommod.admin.AdminList;
-import me.totalfreedom.totalfreedommod.config.ConfigEntry;
-import me.totalfreedom.totalfreedommod.rank.Displayable;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.md_5.bungee.api.ChatColor;
@@ -12,63 +9,37 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @CommandPermissions(level = Rank.NON_OP, source = SourceType.BOTH)
-@CommandParameters(description = "Lists the real names of all online players.", usage = "/<command> [-s | -f | -v]", aliases = "who,lsit")
+@CommandParameters(description = "Lists the real names of all online players.", usage = "/<command> [-a | -v]", aliases = "who,lsit")
 public class Command_list extends FreedomCommand
 {
-
+    @Override
     public boolean run(final CommandSender sender, final Player playerSender, final Command cmd, final String commandLabel, final String[] args, final boolean senderIsConsole)
     {
         if (args.length > 1)
         {
             return false;
         }
-        if (FUtil.isFromHostConsole(sender.getName()))
-        {
-            List<String> names = new ArrayList<>();
-            for (Player player : server.getOnlinePlayers())
-            {
-                if (!plugin.al.isVanished(player.getName()))
-                {
-                    names.add(player.getName());
-                }
-            }
-            msg("There are " + names.size() + "/" + server.getMaxPlayers() + " players online:\n" + StringUtils.join(names, ", "), ChatColor.WHITE);
-            return true;
-        }
+
         ListFilter listFilter;
         if (args.length == 1)
         {
-            String s = args[0];
-            switch (s)
+            switch (args[0].toLowerCase())
             {
-                case "-s":
-                case "-a":
-                {
-                    listFilter = ListFilter.ADMINS;
-                    break;
-                }
-                case "-v":
+                case "-s", "-a" -> listFilter = ListFilter.ADMINS;
+                case "-v" ->
                 {
                     checkRank(Rank.ADMIN);
                     listFilter = ListFilter.VANISHED_ADMINS;
-                    break;
                 }
-                case "-t":
+                case "-t" ->
                 {
                     checkRank(Rank.ADMIN);
                     listFilter = ListFilter.TELNET_SESSIONS;
-                    break;
                 }
-                case "-f":
-                {
-                    listFilter = ListFilter.FAMOUS_PLAYERS;
-                    break;
-                }
-                default:
+                default ->
                 {
                     return false;
                 }
@@ -78,74 +49,42 @@ public class Command_list extends FreedomCommand
         {
             listFilter = ListFilter.PLAYERS;
         }
-        StringBuilder onlineStats = new StringBuilder();
-        StringBuilder onlineUsers = new StringBuilder();
 
-        List<String> n = new ArrayList<>();
+        String onlineStats;
+        List<String> players;
 
         if (listFilter == ListFilter.TELNET_SESSIONS && plugin.al.isAdmin(sender))
         {
-            List<Admin> connectedAdmins = plugin.btb.getConnectedAdmins();
-            onlineStats.append(ChatColor.BLUE).append("There are ").append(ChatColor.RED).append(connectedAdmins.size())
-                    .append(ChatColor.BLUE)
-                    .append(" admins connected to telnet.");
-            for (Admin admin : connectedAdmins)
-            {
-                n.add(admin.getName());
-            }
+            players = plugin.btb.getConnectedAdmins().stream().map(Admin::getName).toList();
+            onlineStats = ChatColor.BLUE + "There are " + ChatColor.RED + players.size() + ChatColor.BLUE
+                    + " admins connected to telnet.";
         }
         else
         {
-            onlineStats.append(ChatColor.BLUE).append("There are ").append(ChatColor.RED).append(FUtil.getFakePlayerCount())
-                    .append(ChatColor.BLUE)
-                    .append(" out of a maximum ")
-                    .append(ChatColor.RED)
-                    .append(server.getMaxPlayers())
-                    .append(ChatColor.BLUE)
-                    .append(" players online.");
-            for (Player p : server.getOnlinePlayers())
-            {
-                if (listFilter == ListFilter.ADMINS && !plugin.al.isAdmin(p))
-                {
-                    continue;
-                }
-                if (listFilter == ListFilter.ADMINS && plugin.al.isVanished(p.getName()))
-                {
-                    continue;
-                }
-                if (listFilter == ListFilter.VANISHED_ADMINS && !plugin.al.isVanished(p.getName()))
-                {
-                    continue;
-                }
-                if (listFilter == ListFilter.FAMOUS_PLAYERS && !ConfigEntry.FAMOUS_PLAYERS.getList().contains(p.getName().toLowerCase()))
-                {
-                    continue;
-                }
-                if (listFilter == ListFilter.PLAYERS && plugin.al.isVanished(p.getName()))
-                {
-                    continue;
-                }
+            onlineStats = ChatColor.BLUE + "There are " + ChatColor.RED + FUtil.getFakePlayerCount() + ChatColor.BLUE
+                    + " out of a maximum " + ChatColor.RED + server.getMaxPlayers() + ChatColor.BLUE + " players online.";
 
-                final Displayable display = plugin.rm.getDisplay(p);
-                n.add(display.getColoredTag() + p.getName());
-            }
+            players = server.getOnlinePlayers().stream().filter(pl ->
+                    (listFilter == ListFilter.ADMINS && plugin.al.isAdmin(pl) && !plugin.al.isVanished(pl.getUniqueId()))
+                    || (listFilter == ListFilter.VANISHED_ADMINS && plugin.al.isVanished(pl.getUniqueId()))
+                    || (listFilter == ListFilter.PLAYERS && !plugin.al.isVanished(pl.getUniqueId()))).map(player ->
+                    plugin.rm.getDisplay(player).getColoredTag() + player.getName()).toList();
         }
-        String playerType = listFilter.toString().toLowerCase().replace('_', ' ');
-        onlineUsers.append("Connected ")
-                .append(playerType)
-                .append(": ")
-                .append(StringUtils.join(n, ChatColor.WHITE + ", "));
+
+        String onlineUsers = "Connected " + listFilter.name().toLowerCase().replace('_', ' ') + ": " + ChatColor.WHITE +
+                StringUtils.join(players, ChatColor.WHITE + ", " + ChatColor.WHITE);
+
         if (senderIsConsole)
         {
-            msg(ChatColor.stripColor(onlineStats.toString()));
-            msg(ChatColor.stripColor(onlineUsers.toString()));
+            msg(ChatColor.stripColor(onlineStats));
+            msg(ChatColor.stripColor(onlineUsers));
         }
         else
         {
-            msg(onlineStats.toString());
-            msg(onlineUsers.toString());
+            msg(onlineStats);
+            msg(onlineUsers);
         }
-        n.clear();
+
         return true;
     }
 
@@ -154,7 +93,6 @@ public class Command_list extends FreedomCommand
         PLAYERS,
         ADMINS,
         VANISHED_ADMINS,
-        TELNET_SESSIONS,
-        FAMOUS_PLAYERS
+        TELNET_SESSIONS
     }
 }

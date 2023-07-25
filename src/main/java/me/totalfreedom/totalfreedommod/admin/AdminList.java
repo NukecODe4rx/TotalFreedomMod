@@ -17,18 +17,13 @@ import org.bukkit.entity.Player;
 
 public class AdminList extends FreedomService
 {
-    public static final List<String> vanished = new ArrayList<>();
+    public static final List<UUID> vanished = new ArrayList<>();
     private final Set<Admin> allAdmins = Sets.newHashSet(); // Includes disabled admins
     // Only active admins below
     private final Set<Admin> activeAdmins = Sets.newHashSet();
     private final Map<UUID, Admin> uuidTable = Maps.newHashMap();
     private final Map<String, Admin> nameTable = Maps.newHashMap();
     private final Map<String, Admin> ipTable = Maps.newHashMap();
-
-    public static List<String> getVanished()
-    {
-        return vanished;
-    }
 
     @Override
     public void onStart()
@@ -97,16 +92,6 @@ public class AdminList extends FreedomService
     public synchronized boolean isAdminSync(CommandSender sender)
     {
         return isAdmin(sender);
-    }
-
-    public List<String> getActiveAdminNames()
-    {
-        List<String> names = new ArrayList();
-        for (Admin admin : activeAdmins)
-        {
-            names.add(admin.getName());
-        }
-        return names;
     }
 
     public boolean isAdmin(CommandSender sender)
@@ -209,6 +194,15 @@ public class AdminList extends FreedomService
         // Save admin
         plugin.sql.addAdmin(admin);
 
+        // Add login time
+        UUID uuid = admin.getUuid();
+        Player player = Bukkit.getPlayer(uuid);
+
+        if (player != null)
+        {
+            plugin.acl.getActivityLog(player).addLogin(player.getLastLogin());
+        }
+
         return true;
     }
 
@@ -280,7 +274,8 @@ public class AdminList extends FreedomService
             ResultSet currentSave = plugin.sql.getAdminByUuid(admin.getUuid());
             for (Map.Entry<String, Object> entry : admin.toSQLStorable().entrySet())
             {
-                Object storedValue = plugin.sql.getValue(currentSave, entry.getKey(), entry.getValue());                if (storedValue != null && !storedValue.equals(entry.getValue()) || storedValue == null && entry.getValue() != null || entry.getValue() == null)
+                Object storedValue = plugin.sql.getValue(currentSave, entry.getKey(), entry.getValue());
+                if (storedValue != null && !storedValue.equals(entry.getValue()) || storedValue == null && entry.getValue() != null || entry.getValue() == null)
                 {
                     plugin.sql.setAdminValue(admin, entry.getKey(), entry.getValue());
                 }
@@ -321,9 +316,9 @@ public class AdminList extends FreedomService
         updateTables();
     }
 
-    public boolean isVanished(String player)
+    public boolean isVanished(UUID uuid)
     {
-        return vanished.contains(player);
+        return vanished.contains(uuid);
     }
 
     public Set<Admin> getAllAdmins()

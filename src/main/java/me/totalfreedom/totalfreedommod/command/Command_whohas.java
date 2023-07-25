@@ -1,6 +1,7 @@
 package me.totalfreedom.totalfreedommod.command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import me.totalfreedom.totalfreedommod.rank.Rank;
@@ -15,17 +16,6 @@ import org.bukkit.entity.Player;
 @CommandParameters(description = "See who has an item and optionally clear the specified item.", usage = "/<command> <item> [clear]", aliases = "wh")
 public class Command_whohas extends FreedomCommand
 {
-
-    public static List<String> getAllMaterials()
-    {
-        List<String> names = new ArrayList<>();
-        for (Material material : Material.values())
-        {
-            names.add(material.name());
-        }
-        return names;
-    }
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
@@ -49,19 +39,16 @@ public class Command_whohas extends FreedomCommand
 
         for (final Player player : server.getOnlinePlayers())
         {
-            if (!plugin.al.isAdmin(sender) && plugin.al.isVanished(player.getName()))
+            if (!plugin.al.isAdmin(sender) && plugin.al.isVanished(player.getUniqueId()))
             {
                 continue;
             }
             if (player.getInventory().contains(material))
             {
                 players.add(player.getName());
-                if (plugin.al.isAdmin(sender))
+                if (plugin.al.isAdmin(sender) && doClear && !plugin.al.isAdmin(player))
                 {
-                    if (doClear && !plugin.al.isAdmin(player))
-                    {
-                        player.getInventory().remove(material);
-                    }
+                    player.getInventory().remove(material);
                 }
             }
         }
@@ -83,7 +70,7 @@ public class Command_whohas extends FreedomCommand
     {
         if (args.length == 1)
         {
-            return getAllMaterials();
+            return Arrays.stream(Material.values()).map(Enum::name).toList();
         }
 
         if (args.length == 2 && plugin.al.isAdmin(sender))

@@ -84,19 +84,22 @@ public class Command_ride extends FreedomCommand
             return true;
         }
 
-        if (args.length >= 2)
+        if (args.length >= 2 && args[0].equalsIgnoreCase("mode"))
         {
-            if (args[0].equalsIgnoreCase("mode"))
+            try
             {
-                if (args[1].equalsIgnoreCase("normal") || args[1].equalsIgnoreCase("off") || args[1].equalsIgnoreCase("ask"))
-                {
-                    PlayerData playerDataSender = plugin.pl.getData(playerSender);
-                    playerDataSender.setRideMode(args[1].toLowerCase());
-                    plugin.pl.save(playerDataSender);
-                    msg("Ride mode is now set to " + args[1].toLowerCase() + ".");
-                    return true;
-                }
+                PlayerData.RideMode mode = PlayerData.RideMode.valueOf(args[1].toUpperCase());
+                PlayerData playerDataSender = plugin.pl.getData(playerSender);
+                playerDataSender.setRideMode(mode);
+                plugin.pl.save(playerDataSender);
+                msg("Ride mode is now set to " + mode.name().toLowerCase() + ".");
             }
+            catch (IllegalArgumentException ex)
+            {
+                msg("Invalid mode.", ChatColor.RED);
+            }
+
+            return true;
         }
 
         final Player player = getPlayer(args[0], true);
@@ -114,13 +117,13 @@ public class Command_ride extends FreedomCommand
             return true;
         }
 
-        if (playerData.getRideMode().equals("off") && !isAdmin(sender))
+        if (playerData.getRideMode() == PlayerData.RideMode.OFF && !isAdmin(sender))
         {
             msg("That player cannot be ridden.", ChatColor.RED);
             return true;
         }
 
-        if (playerData.getRideMode().equals("ask") && !FUtil.isExecutive(playerSender.getName()))
+        if (playerData.getRideMode() == PlayerData.RideMode.ASK && !FUtil.isExecutive(playerSender.getName()))
         {
             msg("Sent a request to the player.", ChatColor.GREEN);
             msg(player, sender.getName() + " has requested to ride you.", ChatColor.AQUA);

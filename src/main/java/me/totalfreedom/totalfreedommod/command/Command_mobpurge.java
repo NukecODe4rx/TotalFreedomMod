@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import me.totalfreedom.totalfreedommod.rank.Rank;
@@ -16,17 +15,6 @@ import org.bukkit.entity.Player;
 @CommandParameters(description = "Purge all mobs in all worlds.", usage = "/<command> [name]", aliases = "mp")
 public class Command_mobpurge extends FreedomCommand
 {
-
-    public static List<String> getAllMobNames()
-    {
-        List<String> names = new ArrayList<>();
-        for (EntityType entityType : Groups.MOB_TYPES)
-        {
-            names.add(entityType.name());
-        }
-        return names;
-    }
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
@@ -67,7 +55,7 @@ public class Command_mobpurge extends FreedomCommand
     {
         if (args.length == 1)
         {
-            return getAllMobNames();
+            return Groups.MOB_TYPES.stream().map(Enum::name).toList();
         }
 
         return Collections.emptyList();

@@ -1,11 +1,11 @@
 package me.totalfreedom.totalfreedommod.command;
 
+import java.util.Arrays;
 import java.util.List;
 
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.EnumUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -24,7 +24,7 @@ public class Command_spawnmob extends FreedomCommand
     {
         if (args.length > 0 && args[0].equalsIgnoreCase("list"))
         {
-            List<EntityType> types = EnumUtils.getEnumList(EntityType.class);
+            List<EntityType> types = Arrays.stream(EntityType.values()).toList();
             String typeList = StringUtils.join(types, ", ").toLowerCase();
             msg(typeList);
             return true;

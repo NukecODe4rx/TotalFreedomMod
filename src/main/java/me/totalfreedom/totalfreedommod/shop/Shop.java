@@ -411,6 +411,37 @@ public class Shop extends FreedomService
 
     }
 
+    public boolean handlePlayerChat(Player player, String message)
+    {
+        if (!ConfigEntry.SHOP_ENABLED.getBoolean())
+        {
+            return false;
+        }
+
+        if (!ConfigEntry.SHOP_REACTIONS_ENABLED.getBoolean())
+        {
+            return false;
+        }
+
+        if (plugin.sh.reactionString.isEmpty())
+        {
+            return false;
+        }
+
+        if (!message.equals(plugin.sh.reactionString))
+        {
+            return false;
+        }
+
+        PlayerData data = plugin.pl.getData(player);
+        data.setCoins(data.getCoins() + plugin.sh.coinsPerReactionWin);
+        plugin.pl.save(data);
+        plugin.sh.endReaction(player.getName());
+        player.sendMessage(ChatColor.GREEN + "You have been given " + ChatColor.GOLD
+                + plugin.sh.coinsPerReactionWin + ChatColor.GREEN + " coins!");
+        return true;
+    }
+
     public ShopItem getShopItem(int slot)
     {
         for (ShopItem shopItem : ShopItem.values())

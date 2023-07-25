@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FUtil;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -21,8 +20,6 @@ import org.bukkit.potion.PotionEffectType;
         aliases = "effect")
 public class Command_potion extends FreedomCommand
 {
-
-    @SuppressWarnings("deprecation")
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
@@ -32,15 +29,8 @@ public class Command_potion extends FreedomCommand
             {
                 if (args[0].equalsIgnoreCase("list"))
                 {
-                    List<String> potionEffectTypeNames = new ArrayList<>();
-                    for (PotionEffectType potion_effect_type : PotionEffectType.values())
-                    {
-                        if (potion_effect_type != null)
-                        {
-                            potionEffectTypeNames.add(potion_effect_type.getName());
-                        }
-                    }
-                    msg("Potion effect types: " + StringUtils.join(potionEffectTypeNames, ", "), ChatColor.AQUA);
+                    msg("Potion effect types: " + FUtil.listToString(Arrays.stream(PotionEffectType.values())
+                            .map(PotionEffectType::getName).toList()), ChatColor.AQUA);
                 }
                 else if (args[0].equalsIgnoreCase("clearall"))
                 {
@@ -50,14 +40,9 @@ public class Command_potion extends FreedomCommand
                         return true;
                     }
 
-                    FUtil.adminAction(sender.getName(), "Cleared all potion effects from all players", true);
-                    for (Player target : server.getOnlinePlayers())
-                    {
-                        for (PotionEffect potion_effect : target.getActivePotionEffects())
-                        {
-                            target.removePotionEffect(potion_effect.getType());
-                        }
-                    }
+                    FUtil.adminAction(sender.getName(), "Clearing all potion effects from all players", true);
+                    server.getOnlinePlayers().forEach(target -> target.getActivePotionEffects().forEach(effect ->
+                            target.removePotionEffect(effect.getType())));
                 }
             }
 
@@ -86,7 +71,7 @@ public class Command_potion extends FreedomCommand
 
                     if (target == null)
                     {
-                        msg(FreedomCommand.PLAYER_NOT_FOUND, ChatColor.RED);
+                        msg(PLAYER_NOT_FOUND, ChatColor.RED);
                         return true;
                     }
 
@@ -95,7 +80,8 @@ public class Command_potion extends FreedomCommand
                         target.removePotionEffect(potion_effect.getType());
                     }
 
-                    msg("Cleared all active potion effects " + (!target.equals(playerSender) ? "from player " + target.getName() + "." : "from yourself."), ChatColor.AQUA);
+                    msg("Cleared all active potion effects " + (!target.equals(playerSender) ? "from player "
+                            + target.getName() + "." : "from yourself."), ChatColor.AQUA);
                 }
                 break;
             }
@@ -117,7 +103,7 @@ public class Command_potion extends FreedomCommand
 
                         target = getPlayer(args[4]);
 
-                        if (target == null || plugin.al.isVanished(target.getName()) && !plugin.al.isAdmin(sender))
+                        if (target == null || plugin.al.isVanished(target.getUniqueId()) && !plugin.al.isAdmin(sender))
                         {
                             msg(PLAYER_NOT_FOUND);
                             return true;
@@ -132,44 +118,41 @@ public class Command_potion extends FreedomCommand
                         }
                     }
 
-                    PotionEffectType potion_effect_type = PotionEffectType.getByName(args[1]);
-                    if (potion_effect_type == null)
+                    PotionEffectType effectType = PotionEffectType.getByName(args[1]);
+                    if (effectType == null)
                     {
-                        msg("Invalid potion effect type.", ChatColor.AQUA);
+                        msg("Invalid potion effect: " + args[1], ChatColor.AQUA);
                         return true;
                     }
 
                     int duration;
                     try
                     {
-                        duration = Integer.parseInt(args[2]);
-                        duration = Math.min(duration, 100000);
+                        duration = Math.min(Integer.parseInt(args[2]), 100000);
                     }
                     catch (NumberFormatException ex)
                     {
-                        msg("Invalid potion duration.", ChatColor.RED);
+                        msg("Invalid duration: " + args[2], ChatColor.RED);
                         return true;
                     }
 
                     int amplifier;
                     try
                     {
-                        amplifier = Integer.parseInt(args[3]);
-                        amplifier = Math.min(amplifier, 100000);
+                        amplifier = Math.min(Integer.parseInt(args[3]), 100000);
                     }
                     catch (NumberFormatException ex)
                     {
-                        msg("Invalid potion amplifier.", ChatColor.RED);
+                        msg("Invalid potion amplifier: " + args[3], ChatColor.RED);
                         return true;
                     }
 
-                    PotionEffect new_effect = potion_effect_type.createEffect(duration, amplifier);
-                    target.addPotionEffect(new_effect, true);
-                    msg(
-                            "Added potion effect: " + new_effect.getType().getName()
-                                    + ", Duration: " + new_effect.getDuration()
-                                    + ", Amplifier: " + new_effect.getAmplifier()
-                                    + (!target.equals(playerSender) ? " to player " + target.getName() + "." : " to yourself."), ChatColor.AQUA);
+                    PotionEffect new_effect = effectType.createEffect(duration, amplifier);
+                    target.addPotionEffect(new_effect);
+                    msg("Added potion effect: " + new_effect.getType().getName()
+                            + ", Duration: " + new_effect.getDuration()
+                            + ", Amplifier: " + new_effect.getAmplifier()
+                            + (!target.equals(playerSender) ? " to player " + target.getName() + "." : " to yourself."), ChatColor.AQUA);
                 }
                 break;
             }
@@ -186,7 +169,7 @@ public class Command_potion extends FreedomCommand
     {
         switch (args.length)
         {
-            case 1:
+            case 1 ->
             {
                 List<String> arguments = new ArrayList<>(Arrays.asList("list", "clear", "add"));
                 if (plugin.al.isAdmin(sender))
@@ -195,72 +178,46 @@ public class Command_potion extends FreedomCommand
                 }
                 return arguments;
             }
-
-            case 2:
+            case 2 ->
             {
-                if (args[0].equals("clear"))
+                if (args[0].equalsIgnoreCase("clear"))
                 {
                     if (plugin.al.isAdmin(sender))
                     {
                         return FUtil.getPlayerList();
                     }
                 }
-                else if (args[0].equals("add"))
+                else if (args[0].equalsIgnoreCase("add"))
                 {
-                    return getAllPotionTypes();
+                    return Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toList();
                 }
-                break;
             }
-
-            case 3:
+            case 3 ->
             {
-                if (args[0].equals("add"))
+                if (args[0].equalsIgnoreCase("add"))
                 {
                     return Collections.singletonList("<duration>");
                 }
-                break;
             }
-
-            case 4:
+            case 4 ->
             {
-                if (args[0].equals("add"))
+                if (args[0].equalsIgnoreCase("add"))
                 {
                     return Collections.singletonList("<amplifier>");
                 }
-                break;
             }
-
-            case 5:
+            case 5 ->
             {
-                if (plugin.al.isAdmin(sender))
+                if (plugin.al.isAdmin(sender) && args[0].equalsIgnoreCase("add"))
                 {
-                    if (args[0].equals("add"))
-                    {
-                        return FUtil.getPlayerList();
-                    }
+                    return FUtil.getPlayerList();
                 }
-                break;
             }
-
-            default:
+            default ->
             {
-                break;
             }
         }
 
         return Collections.emptyList();
-    }
-
-    public List<String> getAllPotionTypes()
-    {
-        List<String> types = new ArrayList<>();
-        for (PotionEffectType potionEffectType : PotionEffectType.values())
-        {
-            if (potionEffectType != null)
-            {
-                types.add(potionEffectType.getName());
-            }
-        }
-        return types;
     }
 }

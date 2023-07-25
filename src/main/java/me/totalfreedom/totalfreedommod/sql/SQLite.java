@@ -84,11 +84,20 @@ public class SQLite extends FreedomService
             {
                 try
                 {
-                    connection.createStatement().execute("CREATE TABLE `admins` (`uuid` VARCHAR NOT NULL, `ips` VARCHAR NOT NULL, `rank` VARCHAR NOT NULL, `active` BOOLEAN NOT NULL, `last_login` LONG NOT NULL, `command_spy` BOOLEAN NOT NULL, `potion_spy` BOOLEAN NOT NULL, `ac_format` VARCHAR, `ptero_id` VARCHAR);");
+                    connection.createStatement().execute("CREATE TABLE `admins` (`uuid` VARCHAR NOT NULL, `ips` VARCHAR NOT NULL, `rank` VARCHAR NOT NULL, `active` BOOLEAN NOT NULL, `last_login` LONG NOT NULL, `command_spy` BOOLEAN NOT NULL, `potion_spy` BOOLEAN NOT NULL, `ac_format` VARCHAR);");
                 }
                 catch (SQLException e)
                 {
                     FLog.severe("Failed to create the admins table: " + e.getMessage());
+                }
+            } else
+            {
+                try
+                {
+                    connection.createStatement().execute("ALTER TABLE `admins` DROP COLUMN `ptero_id`");
+                } catch (SQLException e)
+                {
+                    // Ignore the error. If someone else wants to add WORKING AND TESTED CODE to check if the `ptero_id` column exists, they can, but I couldn't find a good way.
                 }
             }
             if (tableExists(meta, "players"))
@@ -219,7 +228,7 @@ public class SQLite extends FreedomService
     {
         try
         {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO admins VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO admins VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             statement.setString(1, admin.getUuid().toString());
             statement.setString(2, FUtil.listToString(admin.getIps()));
             statement.setString(3, admin.getRank().toString());
@@ -228,7 +237,6 @@ public class SQLite extends FreedomService
             statement.setBoolean(6, admin.getCommandSpy());
             statement.setBoolean(7, admin.getPotionSpy());
             statement.setString(8, admin.getAcFormat());
-            statement.setString(9, admin.getPteroID());
             statement.executeUpdate();
         }
         catch (SQLException e)
@@ -249,7 +257,7 @@ public class SQLite extends FreedomService
             statement.setString(4, player.getTag());
             statement.setString(5, player.getDiscordID());
             statement.setBoolean(6, player.isMasterBuilder());
-            statement.setString(7, player.getRideMode());
+            statement.setString(7, player.getRideMode().name());
             statement.setInt(8, player.getCoins());
             statement.setString(9, FUtil.listToString(player.getItems()));
             statement.setInt(10, player.getTotalVotes());

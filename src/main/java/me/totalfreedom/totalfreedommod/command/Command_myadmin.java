@@ -217,42 +217,33 @@ public class Command_myadmin extends FreedomCommand
         }
         else if (args.length == 2)
         {
-            if (args[0].equals("-o"))
+            if (args[0].equalsIgnoreCase("-o"))
             {
                 return FUtil.getPlayerList();
             }
             else
             {
-                if (doubleArguments.contains(args[0]))
+                if (doubleArguments.contains(args[0]) && args[0].equalsIgnoreCase("clearip"))
                 {
-                    if (args[0].equals("clearip"))
-                    {
-                        List<String> ips = plugin.al.getAdmin(sender).getIps();
-                        ips.remove(FUtil.getIp((Player)sender));
-                        return ips;
-                    }
+                    List<String> ips = plugin.al.getAdmin(sender).getIps();
+                    ips.remove(FUtil.getIp((Player)sender));
+                    return ips;
                 }
             }
         }
-        else if (args.length == 3)
+        else if (args.length == 3 && args[0].equalsIgnoreCase("-o"))
         {
-            if (args[0].equals("-o"))
-            {
-                List<String> options = new ArrayList<>();
-                options.addAll(singleArguments);
-                options.addAll(doubleArguments);
-                return options;
-            }
+            List<String> options = new ArrayList<>();
+            options.addAll(singleArguments);
+            options.addAll(doubleArguments);
+            return options;
         }
-        else if (args.length == 4)
+        else if (args.length == 4 && args[0].equalsIgnoreCase("-o") && args[2].equalsIgnoreCase("clearip"))
         {
-            if (args[0].equals("-o") && args[2].equals("clearip"))
+            Admin admin = plugin.al.getEntryByName(args[1]);
+            if (admin != null)
             {
-                Admin admin = plugin.al.getEntryByName(args[1]);
-                if (admin != null)
-                {
-                    return admin.getIps();
-                }
+                return admin.getIps();
             }
         }
         return FUtil.getPlayerList();

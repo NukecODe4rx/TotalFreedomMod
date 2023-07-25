@@ -6,8 +6,8 @@ import me.totalfreedom.totalfreedommod.rank.Displayable;
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FLog;
 import me.totalfreedom.totalfreedommod.util.FUtil;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -19,7 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 @CommandParameters(description = "Vanish/unvanish yourself.", usage = "/<command> [-s[ilent]]", aliases = "v")
 public class Command_vanish extends FreedomCommand
 {
-
+    @Override
     public boolean run(final CommandSender sender, final Player playerSender, final Command cmd, final String commandLabel, final String[] args, final boolean senderIsConsole)
     {
         Displayable display = plugin.rm.getDisplay(playerSender);
@@ -34,7 +34,7 @@ public class Command_vanish extends FreedomCommand
             }
         }
 
-        if (plugin.al.isVanished(playerSender.getName()))
+        if (plugin.al.isVanished(playerSender.getUniqueId()))
         {
             if (silent)
             {
@@ -44,7 +44,8 @@ public class Command_vanish extends FreedomCommand
             {
                 msg("You have unvanished.", ChatColor.GOLD);
                 FUtil.bcastMsg(plugin.rm.craftLoginMessage(playerSender, null));
-                FUtil.bcastMsg(playerSender.getName() + " joined the game.", ChatColor.YELLOW);
+                server.broadcast(Component.translatable("multiplayer.player.joined", Component.text(playerSender.getName()))
+                        .color(NamedTextColor.YELLOW));
                 plugin.dc.messageChatChannel("**" + playerSender.getName() + " joined the server" + "**", true);
             }
 
@@ -67,7 +68,7 @@ public class Command_vanish extends FreedomCommand
             }
             plugin.esb.setVanished(playerSender.getName(), false);
             playerSender.setPlayerListName(StringUtils.substring(displayName, 0, 16));
-            AdminList.vanished.remove(playerSender.getName());
+            AdminList.vanished.remove(playerSender.getUniqueId());
         }
         else
         {
@@ -76,9 +77,13 @@ public class Command_vanish extends FreedomCommand
                 @Override
                 public void run()
                 {
-                    if (plugin.al.isVanished(playerSender.getName()))
+                    if (plugin.al.isVanished(playerSender.getUniqueId()))
                     {
-                        playerSender.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.GOLD + "You are hidden from other players."));
+                        sender.sendActionBar(Component.text("You are hidden from other players.").color(NamedTextColor.GOLD));
+                    }
+                    else
+                    {
+                        cancel();
                     }
                 }
             }.runTaskTimer(plugin, 0L, 4L);
@@ -90,23 +95,19 @@ public class Command_vanish extends FreedomCommand
             else
             {
                 msg("You have vanished.", ChatColor.GOLD);
-                FUtil.bcastMsg(playerSender.getName() + " left the game.", ChatColor.YELLOW);
+                server.broadcast(Component.translatable("multiplayer.player.left", Component.text(playerSender.getName()))
+                        .color(NamedTextColor.YELLOW));
                 plugin.dc.messageChatChannel("**" + playerSender.getName() + " left the server" + "**", true);
             }
 
             FLog.info(playerSender.getName() + " is now vanished.");
             plugin.al.messageAllAdmins(ChatColor.YELLOW + sender.getName() + " has vanished and is now only visible to admins.");
 
-            for (Player player : server.getOnlinePlayers())
-            {
-                if (!plugin.al.isAdmin(player))
-                {
-                    player.hidePlayer(plugin, playerSender);
-                }
-            }
+            server.getOnlinePlayers().stream().filter(player -> !plugin.al.isAdmin(player)).forEach(player ->
+                    player.hidePlayer(plugin,playerSender));
 
             plugin.esb.setVanished(playerSender.getName(), true);
-            AdminList.vanished.add(playerSender.getName());
+            AdminList.vanished.add(playerSender.getUniqueId());
         }
         return true;
     }

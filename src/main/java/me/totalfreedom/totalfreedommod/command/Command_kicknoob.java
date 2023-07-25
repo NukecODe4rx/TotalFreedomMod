@@ -2,7 +2,8 @@ package me.totalfreedom.totalfreedommod.command;
 
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FUtil;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,20 +12,13 @@ import org.bukkit.entity.Player;
 @CommandParameters(description = "Kick all non-admins on server.", usage = "/<command>", aliases = "kickall")
 public class Command_kicknoob extends FreedomCommand
 {
-
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
     {
         FUtil.adminAction(sender.getName(), "Disconnecting all non-admins", true);
 
-        for (Player player : server.getOnlinePlayers())
-        {
-            if (!plugin.al.isAdmin(player))
-            {
-                player.kickPlayer(ChatColor.RED + "All non-admins were kicked by " + sender.getName() + ".");
-            }
-        }
-
+        server.getOnlinePlayers().stream().filter(player -> !plugin.al.isAdmin(player)).forEach(player ->
+                player.kick(Component.text("All non-admins were kicked by " + sender.getName() + ".", NamedTextColor.RED)));
         return true;
     }
 }

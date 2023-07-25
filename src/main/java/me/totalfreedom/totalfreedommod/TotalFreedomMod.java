@@ -19,7 +19,6 @@ import me.totalfreedom.totalfreedommod.bridge.BukkitTelnetBridge;
 import me.totalfreedom.totalfreedommod.bridge.CoreProtectBridge;
 import me.totalfreedom.totalfreedommod.bridge.EssentialsBridge;
 import me.totalfreedom.totalfreedommod.bridge.LibsDisguisesBridge;
-import me.totalfreedom.totalfreedommod.bridge.TFGuildsBridge;
 import me.totalfreedom.totalfreedommod.bridge.WorldEditBridge;
 import me.totalfreedom.totalfreedommod.bridge.WorldGuardBridge;
 import me.totalfreedom.totalfreedommod.caging.Cager;
@@ -73,7 +72,6 @@ public class TotalFreedomMod extends JavaPlugin
     public CommandLoader cl;
     // Services
     public WorldManager wm;
-    public LogViewer lv;
     public AdminList al;
     public ActivityLog acl;
     public RankManager rm;
@@ -119,16 +117,13 @@ public class TotalFreedomMod extends JavaPlugin
     public HTTPDaemon hd;
     public WorldRestrictions wr;
     public EntityWiper ew;
-    public Sitter st;
     public VanishHandler vh;
-    public Pterodactyl ptero;
     //
     // Bridges
     public BukkitTelnetBridge btb;
     public EssentialsBridge esb;
     public LibsDisguisesBridge ldb;
     public CoreProtectBridge cpb;
-    public TFGuildsBridge tfg;
     public WorldEditBridge web;
     public WorldGuardBridge wgb;
 
@@ -287,7 +282,6 @@ public class TotalFreedomMod extends JavaPlugin
         {
             // Start services
             wm = new WorldManager();
-            lv = new LogViewer();
             sql = new SQLite();
             al = new AdminList();
             acl = new ActivityLog();
@@ -314,9 +308,7 @@ public class TotalFreedomMod extends JavaPlugin
             pem = new PermissionManager();
             gr = new GameRuleHandler();
             ew = new EntityWiper();
-            st = new Sitter();
             vh = new VanishHandler();
-            ptero = new Pterodactyl();
         }
 
         private void initAdminUtils()
@@ -342,7 +334,6 @@ public class TotalFreedomMod extends JavaPlugin
             cpb = new CoreProtectBridge();
             esb = new EssentialsBridge();
             ldb = new LibsDisguisesBridge();
-            tfg = new TFGuildsBridge();
             web = new WorldEditBridge();
             wgb = new WorldGuardBridge();
         }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
+import me.totalfreedom.scissors.event.block.MasterBlockFireEvent;
 import io.papermc.paper.event.player.PlayerSignCommandPreprocessEvent;
 import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
@@ -20,15 +20,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockGrowEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -118,6 +110,28 @@ public class EventBlocker extends FreedomService
     }
 
     @EventHandler(priority = EventPriority.HIGH)
+    public void onBlockExplode(BlockExplodeEvent event)
+    {
+        if (!ConfigEntry.ALLOW_EXPLOSIONS.getBoolean())
+        {
+            event.setCancelled(true);
+            return;
+        }
+
+        event.setYield(ConfigEntry.EXPLOSIVE_RADIUS.getDouble().floatValue());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMasterBlockFire(MasterBlockFireEvent event)
+    {
+        if (!ConfigEntry.ALLOW_MASTERBLOCKS.getBoolean())
+        {
+            event.setCancelled(true);
+            event.getAt().getBlock().setType(Material.CAKE);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void onEntityCombust(EntityCombustEvent event)
     {
         if (!ConfigEntry.ALLOW_EXPLOSIONS.getBoolean())
@@ -148,12 +162,9 @@ public class EventBlocker extends FreedomService
         if (ConfigEntry.ENABLE_PET_PROTECT.getBoolean())
         {
             Entity entity = event.getEntity();
-            if (entity instanceof Tameable)
+            if (entity instanceof Tameable tameable && tameable.isTamed())
             {
-                if (((Tameable)entity).isTamed())
-                {
-                    event.setCancelled(true);
-                }
+                event.setCancelled(true);
             }
         }
     }

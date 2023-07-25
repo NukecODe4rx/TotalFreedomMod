@@ -3,15 +3,9 @@ package me.totalfreedom.totalfreedommod.discord;
 import com.google.common.base.Strings;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.SplittableRandom;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 
 import com.google.common.collect.ImmutableList;
@@ -29,11 +23,9 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -41,12 +33,13 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.internal.utils.concurrent.CountingThreadFactory;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.apache.commons.lang.StringUtils;
+import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -55,6 +48,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Discord extends FreedomService
 {
@@ -66,7 +60,6 @@ public class Discord extends FreedomService
     public List<CompletableFuture<Message>> sentMessages = new ArrayList<>();
     public Boolean enabled = false;
     private static final ImmutableList<String> DISCORD_SUBDOMAINS = ImmutableList.of("discordapp.com", "discord.com", "discord.gg");
-    private final Pattern DISCORD_MENTION_PATTERN = Pattern.compile("(<@!?([0-9]{16,20})>)");
 
     public static String getCode(PlayerData playerData)
     {
@@ -201,15 +194,18 @@ public class Discord extends FreedomService
         catch (LoginException e)
         {
             FLog.warning("An invalid token for Discord integration was provided, the bot will not enable.");
+            enabled = false;
         }
         catch (IllegalArgumentException e)
         {
             FLog.warning("Discord integration failed to start.");
+            enabled = false;
         }
         catch (NoClassDefFoundError e)
         {
             FLog.warning("The JDA plugin is not installed, therefore the discord bot cannot start.");
-            FLog.warning("To resolve this error, please download the latest JDA from: https://github.com/TFPatches/Minecraft-JDA/releases");
+            FLog.warning("To resolve this error, please download the latest JDA from: https://github.com/AtlasMediaGroup/Minecraft-JDA/releases");
+            enabled = false;
         }
 
     }
@@ -232,32 +228,6 @@ public class Discord extends FreedomService
         messageChatChannel("**Message queue cleared**", true);
     }
 
-    public void sendPteroInfo(PlayerData playerData, String username, String password)
-    {
-        User user = getUser(playerData.getDiscordID());
-        String message = "The following are your Pterodactyl details:\n\nUsername: " + username + "\nPassword: " + password + "\n\nYou can connect to the panel at " + plugin.ptero.URL;
-        PrivateChannel privateChannel = user.openPrivateChannel().complete();
-        privateChannel.sendMessage(message).complete();
-    }
-
-    public User getUser(String id)
-    {
-        Guild guild = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        if (guild == null)
-        {
-            FLog.severe("Either the bot is not in the Discord server or it doesn't exist. Check the server ID.");
-            return null;
-        }
-
-        Member member = guild.getMemberById(id);
-        if (member == null)
-        {
-            return null;
-        }
-
-        return member.getUser();
-    }
-
     public String generateCode(int size)
     {
         return RandomStringUtils.randomNumeric(size);
@@ -277,7 +247,7 @@ public class Discord extends FreedomService
 
         if (deathMessage != null)
         {
-            messageChatChannel("**" + PlainTextComponentSerializer.plainText().serialize(deathMessage) + "**", true);
+            messageChatChannel("**" + deformat(PlainTextComponentSerializer.plainText().serialize(deathMessage)) + "**", true);
         }
     }
 
@@ -290,30 +260,24 @@ public class Discord extends FreedomService
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event)
     {
-        if (!plugin.al.isVanished(event.getPlayer().getName()))
+        if (!plugin.al.isVanished(event.getPlayer().getUniqueId()))
         {
-            messageChatChannel("**" + event.getPlayer().getName() + " joined the server" + "**", true);
+            messageChatChannel("**" + deformat(event.getPlayer().getName()) + " joined the server" + "**", true);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLeave(PlayerQuitEvent event)
     {
-        if (!plugin.al.isVanished(event.getPlayer().getName()))
+        if (!plugin.al.isVanished(event.getPlayer().getUniqueId()))
         {
-            messageChatChannel("**" + event.getPlayer().getName() + " left the server" + "**", true);
+            messageChatChannel("**" + deformat(event.getPlayer().getName()) + " left the server" + "**", true);
         }
     }
 
     public static String sanitizeChatMessage(String message)
     {
         String newMessage = message;
-
-        if (message.contains("@"))
-        {
-            // \u200B is Zero Width Space, invisible on Discord
-            newMessage = message.replaceAll("@", "@\u200B");
-        }
 
         if (message.toLowerCase().contains("discord.gg")) // discord.gg/invite works as an invite
         {
@@ -330,10 +294,10 @@ public class Discord extends FreedomService
 
         if (message.contains("§"))
         {
-            newMessage = message.replaceAll("§", "");
+            newMessage = message.replace("§", "");
         }
 
-        return deformat(newMessage);
+        return newMessage;
     }
 
     public void messageChatChannel(String message)
@@ -351,7 +315,7 @@ public class Discord extends FreedomService
 
         if (enabled && !chat_channel_id.isEmpty())
         {
-            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).submit(true);
+            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).allowedMentions(Collections.emptyList()).submit(true);
             sentMessages.add(sentMessage);
         }
     }
@@ -371,7 +335,7 @@ public class Discord extends FreedomService
 
         if (enabled && !chat_channel_id.isEmpty())
         {
-            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).submit(true);
+            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).allowedMentions(Collections.emptyList()).submit(true);
             sentMessages.add(sentMessage);
         }
     }
@@ -429,81 +393,86 @@ public class Discord extends FreedomService
         return true;
     }
 
-    public boolean sendReportOffline(Player reporter, OfflinePlayer reported, String reason)
+    public CompletableFuture<Boolean> sendReport(String reporterName, String reportedName, String reason)
     {
-        if (!shouldISendReport())
+        return CompletableFuture.supplyAsync(() ->
         {
-            return false;
-        }
-
-        final Guild server = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        final TextChannel channel = server.getTextChannelById(ConfigEntry.DISCORD_REPORT_CHANNEL_ID.getString());
-
-        final EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Report for " + reported.getName() + " (offline)");
-        embedBuilder.setDescription(reason);
-        embedBuilder.setFooter("Reported by " + reporter.getName(), "https://minotar.net/helm/" + reporter.getName() + ".png");
-        embedBuilder.setTimestamp(Instant.from(ZonedDateTime.now()));
-        if (plugin.esb.isEnabled())
-        {
-            com.earth2me.essentials.User user = plugin.esb.getEssentialsUser(reported.getName());
-            String location = "World: " + Objects.requireNonNull(user.getLastLocation().getWorld()).getName() + ", X: " + user.getLastLocation().getBlockX() + ", Y: " + user.getLastLocation().getBlockY() + ", Z: " + user.getLastLocation().getBlockZ();
-            embedBuilder.addField("Location", location, true);
-            embedBuilder.addField("God Mode", WordUtils.capitalizeFully(String.valueOf(user.isGodModeEnabled())), true);
-            if (user.getNickname() != null)
+            if (!shouldISendReport())
             {
-                embedBuilder.addField("Nickname", user.getNickname(), true);
+                return false;
             }
-        }
-        MessageEmbed embed = embedBuilder.build();
-        Message message = channel.sendMessage(embed).complete();
 
-        if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
-        {
-            message.addReaction("\uD83D\uDCCB").complete();
-        }
+            final Guild server = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
 
-        return true;
-    }
-
-    public boolean sendReport(Player reporter, Player reported, String reason)
-    {
-        if (!shouldISendReport())
-        {
-            return false;
-        }
-
-        final Guild server = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        final TextChannel channel = server.getTextChannelById(ConfigEntry.DISCORD_REPORT_CHANNEL_ID.getString());
-
-        final EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Report for " + reported.getName());
-        embedBuilder.setDescription(reason);
-        embedBuilder.setFooter("Reported by " + reporter.getName(), "https://minotar.net/helm/" + reporter.getName() + ".png");
-        embedBuilder.setTimestamp(Instant.from(ZonedDateTime.now()));
-        String location = "World: " + Objects.requireNonNull(reported.getLocation().getWorld()).getName() + ", X: " + reported.getLocation().getBlockX() + ", Y: " + reported.getLocation().getBlockY() + ", Z: " + reported.getLocation().getBlockZ();
-        embedBuilder.addField("Location", location, true);
-        embedBuilder.addField("Game Mode", WordUtils.capitalizeFully(reported.getGameMode().name()), true);
-
-        if (plugin.esb.isEnabled())
-        {
-            com.earth2me.essentials.User user = plugin.esb.getEssentialsUser(reported.getName());
-            embedBuilder.addField("God Mode", WordUtils.capitalizeFully(String.valueOf(user.isGodModeEnabled())), true);
-            if (user.getNickname() != null)
+            if (server == null)
             {
-                embedBuilder.addField("Nickname", user.getNickname(), true);
+                FLog.severe("The guild ID specified in the config is invalid.");
+                return false;
             }
-        }
 
-        MessageEmbed embed = embedBuilder.build();
-        Message message = channel.sendMessage(embed).complete();
+            final TextChannel channel = server.getTextChannelById(ConfigEntry.DISCORD_REPORT_CHANNEL_ID.getString());
 
-        if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
-        {
-            message.addReaction("\uD83D\uDCCB").complete();
-        }
+            if (channel == null)
+            {
+                FLog.severe("The report channel ID specified in the config is invalid.");
+                return false;
+            }
 
-        return true;
+            Player onlinePlayer = Bukkit.getPlayer(reportedName);
+            boolean online = onlinePlayer != null;
+
+            final EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("Report for " + reportedName + (online ? "" : " (offline)"));
+            embedBuilder.setDescription(reason);
+            embedBuilder.setFooter("Reported by " + reporterName, "https://minotar.net/helm/" + reporterName + ".png");
+            embedBuilder.setTimestamp(Instant.from(ZonedDateTime.now()));
+
+            Location location = null;
+            Boolean godMode = null;
+            String nickName = null;
+
+            if (plugin.esb.isEnabled())
+            {
+                com.earth2me.essentials.User user = plugin.esb.getEssentialsUser(reportedName);
+                if (!online)
+                {
+                    location = user.getLastLocation();
+                }
+
+                godMode = user.isGodModeEnabled();
+                nickName = user.getNickname();
+            }
+
+            if (location == null && online)
+            {
+                location = onlinePlayer.getLocation();
+            }
+
+            if (location != null)
+            {
+                embedBuilder.addField("Location", "World: " + location.getWorld().getName() + ", X: " + location.getBlockX() + ", Y: " + location.getBlockY() + ", Z: " + location.getBlockZ(), true);
+            }
+
+            if (godMode != null)
+            {
+                embedBuilder.addField("God Mode", WordUtils.capitalizeFully(godMode.toString()), true);
+            }
+
+            if (nickName != null)
+            {
+                embedBuilder.addField("Nickname", nickName, true);
+            }
+
+            MessageEmbed embed = embedBuilder.build();
+            Message message = channel.sendMessageEmbeds(embed).complete();
+
+            if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
+            {
+                message.addReaction("\uD83D\uDCCB").complete();
+            }
+
+            return true;
+        }, t -> Bukkit.getScheduler().runTaskAsynchronously(plugin, t));
     }
 
     // Do no ask why this is here. I spent two hours trying to make a simple thing work
@@ -513,5 +482,30 @@ public class Discord extends FreedomService
         {
             messageChatChannel("**Server has started**", true);
         }
+    }
+
+    public void onPlayerChat(Player player, String message)
+    {
+        if (ConfigEntry.ADMIN_ONLY_MODE.getBoolean())
+        {
+            return;
+        }
+
+        if (server.hasWhitelist())
+        {
+            return;
+        }
+
+        if (plugin.pl.getPlayer(player).isMuted())
+        {
+            return;
+        }
+
+        if (bot == null)
+        {
+            return;
+        }
+
+        messageChatChannel(deformat(player.getName()) + " \u00BB " + ChatColor.stripColor(message));
     }
 }

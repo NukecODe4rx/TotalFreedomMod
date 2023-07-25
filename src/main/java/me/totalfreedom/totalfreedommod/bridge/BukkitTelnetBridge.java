@@ -90,7 +90,10 @@ public class BukkitTelnetBridge extends FreedomService
 
             playerTags.put("tfm.playerdata.getTag", plugin.pl.getPlayer(player).getTag());
 
-            playerTags.put("tfm.essentialsBridge.getNickname", plugin.esb.getNickname(player.getName()));
+            if (server.getPluginManager().isPluginEnabled("Essentials"))
+            {
+                playerTags.put("tfm.essentialsBridge.getNickname", plugin.esb.getNickname(player.getName()));
+            }
         }
     }
 
@@ -101,12 +104,9 @@ public class BukkitTelnetBridge extends FreedomService
             try
             {
                 final Plugin bukkitTelnet = server.getPluginManager().getPlugin("BukkitTelnet");
-                if (bukkitTelnet != null)
+                if (bukkitTelnet instanceof BukkitTelnet)
                 {
-                    if (bukkitTelnet instanceof BukkitTelnet)
-                    {
-                        bukkitTelnetPlugin = (BukkitTelnet)bukkitTelnet;
-                    }
+                    bukkitTelnetPlugin = (BukkitTelnet)bukkitTelnet;
                 }
             }
             catch (Exception ex)

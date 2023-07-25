@@ -1,11 +1,10 @@
 package me.totalfreedom.totalfreedommod.command;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
 import me.totalfreedom.totalfreedommod.rank.Rank;
 import me.totalfreedom.totalfreedommod.util.FUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -31,7 +30,8 @@ public class Command_whitelist extends FreedomCommand
                 msg("There are no whitelisted players.");
                 return true;
             }
-            msg("Whitelisted players: " + FUtil.playerListToNames(server.getWhitelistedPlayers()));
+            msg("Whitelisted players: " + FUtil.listToString(server.getWhitelistedPlayers().stream().map(player ->
+                    player.getName() != null ? player.getName() : player.getUniqueId().toString()).toList()));
             return true;
         }
 
@@ -187,21 +187,11 @@ public class Command_whitelist extends FreedomCommand
             }
             else if (args[0].equals("remove"))
             {
-                return getWhitelistedNames();
+                return server.getWhitelistedPlayers().stream().map(OfflinePlayer::getName).filter(Objects::nonNull).toList();
             }
         }
 
         return Collections.emptyList();
-    }
-
-    public List<String> getWhitelistedNames()
-    {
-        List<String> names = new ArrayList<>();
-        for (OfflinePlayer player : server.getWhitelistedPlayers())
-        {
-            names.add(player.getName());
-        }
-        return names;
     }
 
     public int purge()
