@@ -478,7 +478,7 @@ public class Discord extends FreedomService
             }
 
             return true;
-        });
+        }, t -> Bukkit.getScheduler().runTaskAsynchronously(plugin, t));
     }
 
     // Do no ask why this is here. I spent two hours trying to make a simple thing work
