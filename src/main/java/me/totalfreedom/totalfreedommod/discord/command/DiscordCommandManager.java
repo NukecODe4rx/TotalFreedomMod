@@ -71,7 +71,7 @@ public class DiscordCommandManager
                     embedBuilder.setTitle("Command error");
                     embedBuilder.setColor(Color.RED);
                     embedBuilder.setDescription("You don't have permission to execute this command.");
-                    messageBuilder.setEmbed(embedBuilder.build());
+                    messageBuilder.setEmbeds(embedBuilder.build());
                     final Message message = messageBuilder.build();
 
                     final CompletableFuture<Message> futureMessage = channel.sendMessage(message).submit(true);

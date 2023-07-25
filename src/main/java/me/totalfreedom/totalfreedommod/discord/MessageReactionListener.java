@@ -62,7 +62,7 @@ public class MessageReactionListener extends ListenerAdapter
         final MessageBuilder archiveMessageBuilder = new MessageBuilder();
         archiveMessageBuilder.setContent("Report completed by " + completer.getUser().getAsMention() + " (" + Discord.deformat(completer.getUser().getAsTag() + ")"));
         archiveMessageBuilder.setAllowedMentions(Collections.emptyList());
-        archiveMessageBuilder.setEmbed(embed);
+        archiveMessageBuilder.setEmbeds(embed);
         final Message archiveMessage = archiveMessageBuilder.build();
 
         archiveChannel.sendMessage(archiveMessage).complete();
