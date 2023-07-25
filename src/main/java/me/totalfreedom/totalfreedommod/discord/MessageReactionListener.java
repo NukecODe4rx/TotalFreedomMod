@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import java.util.Collections;
+
 public class MessageReactionListener extends ListenerAdapter
 {
     public void onMessageReactionAdd(MessageReactionAddEvent messageReactionAddEvent)
@@ -59,6 +61,7 @@ public class MessageReactionListener extends ListenerAdapter
         final MessageEmbed embed = message.getEmbeds().get(0);
         final MessageBuilder archiveMessageBuilder = new MessageBuilder();
         archiveMessageBuilder.setContent("Report completed by " + completer.getUser().getAsMention() + " (" + Discord.deformat(completer.getUser().getAsTag() + ")"));
+        archiveMessageBuilder.setAllowedMentions(Collections.emptyList());
         archiveMessageBuilder.setEmbed(embed);
         final Message archiveMessage = archiveMessageBuilder.build();
 
