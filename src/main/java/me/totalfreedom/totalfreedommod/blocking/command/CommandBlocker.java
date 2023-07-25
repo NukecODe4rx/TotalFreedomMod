@@ -30,24 +30,6 @@ public class CommandBlocker extends FreedomService
     private final Map<String, CommandBlockerEntry> entryList = Maps.newHashMap();
     private final List<String> unknownCommands = Lists.newArrayList();
 
-    public static CommandMap getCommandMap()
-    {
-        try
-        {
-            SimplePluginManager simplePluginManager = (SimplePluginManager)Bukkit.getServer().getPluginManager();
-
-            Field commandMapField = SimplePluginManager.class.getDeclaredField("commandMap");
-            commandMapField.setAccessible(true);
-
-            return (SimpleCommandMap)commandMapField.get(simplePluginManager);
-        }
-        catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e)
-        {
-            FLog.severe("Failed to get command map field (" + e.getMessage() + ")");
-        }
-        return null;
-    }
-
     @Override
     public void onStart()
     {
@@ -65,7 +47,7 @@ public class CommandBlocker extends FreedomService
         entryList.clear();
         unknownCommands.clear();
 
-        final CommandMap commandMap = getCommandMap();
+        final CommandMap commandMap = Bukkit.getCommandMap();
 
         @SuppressWarnings("unchecked")
         List<String> blockedCommands = (List<String>)ConfigEntry.BLOCKED_COMMANDS.getList();
