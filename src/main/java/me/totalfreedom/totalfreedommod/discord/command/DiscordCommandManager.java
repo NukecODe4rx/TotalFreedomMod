@@ -48,19 +48,19 @@ public class DiscordCommandManager
 
     public boolean parse(String content, Member member, TextChannel channel)
     {
-        List<String> args = new ArrayList<>(Arrays.asList(content.split(" ")));
+        final String actualContent = content.substring(PREFIX.length()).trim();
+        List<String> args = new ArrayList<>(Arrays.asList(actualContent.split(" ")));
         if (args.isEmpty())
         {
             return false;
         }
 
-        final String[] aliasParts = args.remove(0).split(PREFIX);
-        if (aliasParts.length < 2)
+        final String alias = args.get(0);
+
+        if (alias.isEmpty())
         {
             return false;
         }
-
-        final String alias = aliasParts[1];
 
         for (DiscordCommand command : commands)
         {

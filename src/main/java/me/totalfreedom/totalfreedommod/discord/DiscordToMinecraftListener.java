@@ -58,7 +58,7 @@ public class DiscordToMinecraftListener extends ListenerAdapter
         final Message msg = event.getMessage();
         final String content = msg.getContentStripped();
 
-        if (content.startsWith(ConfigEntry.DISCORD_PREFIX.getString()) && Discord.DISCORD_COMMAND_MANAGER.parse(content, member, textChannel))
+        if (content.toLowerCase().startsWith(ConfigEntry.DISCORD_PREFIX.getString().toLowerCase()) && Discord.DISCORD_COMMAND_MANAGER.parse(content, member, textChannel))
         {
             return;
         }
