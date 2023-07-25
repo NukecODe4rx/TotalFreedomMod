@@ -265,7 +265,8 @@ public class AdminList extends FreedomService
             ResultSet currentSave = plugin.sql.getAdminByUuid(admin.getUuid());
             for (Map.Entry<String, Object> entry : admin.toSQLStorable().entrySet())
             {
-                Object storedValue = plugin.sql.getValue(currentSave, entry.getKey(), entry.getValue());                if (storedValue != null && !storedValue.equals(entry.getValue()) || storedValue == null && entry.getValue() != null || entry.getValue() == null)
+                Object storedValue = plugin.sql.getValue(currentSave, entry.getKey(), entry.getValue());
+                if (storedValue != null && !storedValue.equals(entry.getValue()) || storedValue == null && entry.getValue() != null || entry.getValue() == null)
                 {
                     plugin.sql.setAdminValue(admin, entry.getKey(), entry.getValue());
                 }

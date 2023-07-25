@@ -15,7 +15,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -115,6 +114,11 @@ public class CoreProtectBridge extends FreedomService
 
     public boolean isEnabled()
     {
+        if (!server.getPluginManager().isPluginEnabled("CoreProtect"))
+        {
+            return false;
+        }
+
         final CoreProtect coreProtect = getCoreProtect();
         return coreProtect != null && coreProtect.isEnabled();
     }
@@ -221,17 +225,11 @@ public class CoreProtectBridge extends FreedomService
                         // Do nothing (shuts Codacy up)
                     }
                 }
-                line.append(symbol);
-
-                // Player
-                line.append(Component.text(entry.getPlayer()).color(TextColor.color(0x30ade4)));
-
-                // Action, Part 2
-                line.append(action.color(NamedTextColor.WHITE));
-
-                // Block
-                line.append(Component.text(entry.getBlockData().getMaterial().name().toLowerCase())
-                        .color(TextColor.color(0x30ade4)));
+                // Symbol, player, action, block
+                line.append(symbol).append(Component.text(entry.getPlayer()).color(TextColor.color(0x30ade4)))
+                        .append(action.color(NamedTextColor.WHITE)).append(
+                                Component.text(entry.getBlockData().getMaterial().name().toLowerCase())
+                                .color(TextColor.color(0x30ade4)));
 
                 // Rolled back?
                 if (entry.isRolledBack())

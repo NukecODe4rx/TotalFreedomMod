@@ -46,12 +46,9 @@ public class Command_whohas extends FreedomCommand
             if (player.getInventory().contains(material))
             {
                 players.add(player.getName());
-                if (plugin.al.isAdmin(sender))
+                if (plugin.al.isAdmin(sender) && doClear && !plugin.al.isAdmin(player))
                 {
-                    if (doClear && !plugin.al.isAdmin(player))
-                    {
-                        player.getInventory().remove(material);
-                    }
+                    player.getInventory().remove(material);
                 }
             }
         }

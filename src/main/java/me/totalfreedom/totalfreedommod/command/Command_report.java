@@ -1,6 +1,8 @@
 package me.totalfreedom.totalfreedommod.command;
 
 import me.totalfreedom.totalfreedommod.rank.Rank;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -8,11 +10,28 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 @CommandPermissions(level = Rank.OP, source = SourceType.ONLY_IN_GAME)
 @CommandParameters(description = "Report a player for all admins to see.", usage = "/<command> <player> <reason>")
 public class Command_report extends FreedomCommand
 {
+    private void handleLog(final @Nullable Boolean value, final @Nullable Throwable ex, final CommandSender sender)
+    {
+        if (ex != null)
+        {
+            sender.sendMessage(Component.text("An error occurred while attempting to log your previously filed report to a Discord channel.", NamedTextColor.RED));
+            ex.printStackTrace();
+            return;
+        }
+
+        if (Boolean.FALSE.equals(value))
+        {
+            return;
+        }
+
+        sender.sendMessage(Component.text("The report you previously filed has been successfully logged to a Discord channel. Please note that spamming reports is not allowed, and you will be sanctioned if you are found to be doing it.", NamedTextColor.GRAY));
+    }
 
     @Override
     public boolean run(CommandSender sender, Player playerSender, Command cmd, String commandLabel, String[] args, boolean senderIsConsole)
@@ -50,17 +69,22 @@ public class Command_report extends FreedomCommand
         }
 
         String report = StringUtils.join(ArrayUtils.subarray(args, 1, args.length), " ");
-        plugin.cm.reportAction(playerSender, (player == null) ? offlinePlayer.getName() : player.getName(), report);
+        String reportedUsername = (player == null) ? offlinePlayer.getName() : player.getName();
+        plugin.cm.reportAction(playerSender, reportedUsername, report);
 
-        boolean logged = false;
+        msg(ChatColor.GREEN + "Thank you, your report is being processed.");
 
         if (plugin.dc.enabled)
         {
-            logged = (player == null) ? plugin.dc.sendReportOffline(playerSender, offlinePlayer, report) : plugin.dc.sendReport(playerSender, player, report);
+            if (player == null)
+            {
+                plugin.dc.sendReportOffline(playerSender, offlinePlayer, report);
+            }
+            else
+            {
+                plugin.dc.sendReport(playerSender, player, report);
+            }
         }
-
-        msg(ChatColor.GREEN + "Thank you, your report has been successfully logged."
-                + (logged ? ChatColor.RED + "\nNote: This report has been logged to a discord channel, as with any report system, spamming reports can lead to you getting banned." : ""));
 
         return true;
     }

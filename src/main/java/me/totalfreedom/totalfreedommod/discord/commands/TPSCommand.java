@@ -1,6 +1,5 @@
 package me.totalfreedom.totalfreedommod.discord.commands;
 
-import me.totalfreedom.totalfreedommod.discord.command.DiscordCommand;
 import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandImpl;
 import me.totalfreedom.totalfreedommod.util.FUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -8,7 +7,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 
 import java.util.Collections;
 import java.util.List;

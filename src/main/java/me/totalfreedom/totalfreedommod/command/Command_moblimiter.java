@@ -45,6 +45,10 @@ public class Command_moblimiter extends FreedomCommand
                     return true;
                 }
             }
+            default ->
+            {
+                // Shut the fuck up Codacy!
+            }
         }
 
         if (ConfigEntry.MOB_LIMITER_ENABLED.getBoolean())

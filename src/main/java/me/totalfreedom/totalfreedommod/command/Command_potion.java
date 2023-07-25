@@ -169,7 +169,7 @@ public class Command_potion extends FreedomCommand
     {
         switch (args.length)
         {
-            case 1:
+            case 1 ->
             {
                 List<String> arguments = new ArrayList<>(Arrays.asList("list", "clear", "add"));
                 if (plugin.al.isAdmin(sender))
@@ -178,56 +178,43 @@ public class Command_potion extends FreedomCommand
                 }
                 return arguments;
             }
-
-            case 2:
+            case 2 ->
             {
-                if (args[0].equals("clear"))
+                if (args[0].equalsIgnoreCase("clear"))
                 {
                     if (plugin.al.isAdmin(sender))
                     {
                         return FUtil.getPlayerList();
                     }
                 }
-                else if (args[0].equals("add"))
+                else if (args[0].equalsIgnoreCase("add"))
                 {
                     return Arrays.stream(PotionEffectType.values()).map(PotionEffectType::getName).toList();
                 }
-                break;
             }
-
-            case 3:
+            case 3 ->
             {
-                if (args[0].equals("add"))
+                if (args[0].equalsIgnoreCase("add"))
                 {
                     return Collections.singletonList("<duration>");
                 }
-                break;
             }
-
-            case 4:
+            case 4 ->
             {
-                if (args[0].equals("add"))
+                if (args[0].equalsIgnoreCase("add"))
                 {
                     return Collections.singletonList("<amplifier>");
                 }
-                break;
             }
-
-            case 5:
+            case 5 ->
             {
-                if (plugin.al.isAdmin(sender))
+                if (plugin.al.isAdmin(sender) && args[0].equalsIgnoreCase("add"))
                 {
-                    if (args[0].equals("add"))
-                    {
-                        return FUtil.getPlayerList();
-                    }
+                    return FUtil.getPlayerList();
                 }
-                break;
             }
-
-            default:
+            default ->
             {
-                break;
             }
         }
 

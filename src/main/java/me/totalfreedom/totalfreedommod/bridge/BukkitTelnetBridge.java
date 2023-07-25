@@ -106,12 +106,9 @@ public class BukkitTelnetBridge extends FreedomService
             try
             {
                 final Plugin bukkitTelnet = server.getPluginManager().getPlugin("BukkitTelnet");
-                if (bukkitTelnet != null)
+                if (bukkitTelnet instanceof BukkitTelnet)
                 {
-                    if (bukkitTelnet instanceof BukkitTelnet)
-                    {
-                        bukkitTelnetPlugin = (BukkitTelnet)bukkitTelnet;
-                    }
+                    bukkitTelnetPlugin = (BukkitTelnet)bukkitTelnet;
                 }
             }
             catch (Exception ex)

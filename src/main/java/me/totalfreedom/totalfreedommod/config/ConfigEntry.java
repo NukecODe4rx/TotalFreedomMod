@@ -165,19 +165,6 @@ public enum ConfigEntry
         this.configName = configName;
     }
 
-    public static ConfigEntry findConfigEntry(String name)
-    {
-        name = name.toLowerCase().replace("_", "");
-        for (ConfigEntry entry : values())
-        {
-            if (entry.toString().toLowerCase().replace("_", "").equals(name))
-            {
-                return entry;
-            }
-        }
-        return null;
-    }
-
     public Class<?> getType()
     {
         return type;

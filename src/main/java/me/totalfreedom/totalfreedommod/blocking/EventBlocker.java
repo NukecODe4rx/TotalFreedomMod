@@ -162,12 +162,9 @@ public class EventBlocker extends FreedomService
         if (ConfigEntry.ENABLE_PET_PROTECT.getBoolean())
         {
             Entity entity = event.getEntity();
-            if (entity instanceof Tameable)
+            if (entity instanceof Tameable tameable && tameable.isTamed())
             {
-                if (((Tameable) entity).isTamed())
-                {
-                    event.setCancelled(true);
-                }
+                event.setCancelled(true);
             }
         }
     }

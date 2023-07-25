@@ -46,8 +46,13 @@ public class ChatManager extends FreedomService
     private void handleChatEvent(AsyncPlayerChatEvent event)
     {
         final Player player = event.getPlayer();
-        String message = event.getMessage().trim();
-
+        String originalMessage = event.getMessage();
+        if (plugin.mu.onPlayerChat(player) || plugin.sh.handlePlayerChat(player, originalMessage))
+        {
+            event.setCancelled(true);
+            return;
+        }
+        String message = originalMessage.trim();
         // Format colors and strip &k
         message = FUtil.colorize(message);
         message = message.replaceAll(ChatColor.MAGIC.toString(), "&k");

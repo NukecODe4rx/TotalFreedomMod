@@ -85,7 +85,7 @@ public class ListCommand extends DiscordCommandImpl
             }
             else
             {
-                displayables.put(displayable, new ArrayList<>(List.of(player.getName())));
+                displayables.put(displayable, new ArrayList<>(List.of(name)));
             }
         });
 

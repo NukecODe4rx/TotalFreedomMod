@@ -48,17 +48,21 @@ public class DiscordCommandManager
         FLog.info("Loaded " + commands.size() + " Discord commands.");
     }
 
-    public void parse(String content, Member member, TextChannel channel)
+    public boolean parse(String content, Member member, TextChannel channel)
     {
-        List<String> args = new ArrayList<>(Arrays.asList(content.split(" ")));
-
-        final String[] prefixSplit = args.remove(0).split(PREFIX); // The joys of command parsing
-        if (prefixSplit.length <= 1)
+        final String actualContent = content.substring(PREFIX.length()).trim();
+        List<String> args = new ArrayList<>(Arrays.asList(actualContent.split(" ")));
+        if (args.isEmpty())
         {
-            return;
+            return false;
         }
 
-        final String alias = prefixSplit[1];
+        final String alias = args.get(0);
+
+        if (alias.isEmpty())
+        {
+            return false;
+        }
 
         for (DiscordCommand command : commands)
         {
@@ -81,5 +85,7 @@ public class DiscordCommandManager
                 }
             }
         }
+
+        return false;
     }
 }

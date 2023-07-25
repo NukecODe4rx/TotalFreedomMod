@@ -156,7 +156,7 @@ public class Admin
                 }
 
                 // Ensure admins don't have admin functionality when removed (FS-222)
-                AdminList.vanished.remove(getName());
+                AdminList.vanished.remove(getUuid());
 
                 if (plugin.esb != null)
                 {
