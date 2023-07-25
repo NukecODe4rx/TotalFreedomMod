@@ -13,13 +13,7 @@ import me.totalfreedom.totalfreedommod.player.FPlayer;
 import me.totalfreedom.totalfreedommod.player.PlayerData;
 import me.totalfreedom.totalfreedommod.shop.ShopItem;
 import me.totalfreedom.totalfreedommod.util.FUtil;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EnderPearl;
@@ -100,6 +94,11 @@ public class ItemFun extends FreedomService
     {
 
         Player player = event.getPlayer();
+        if (player.getGameMode().equals(GameMode.SPECTATOR))
+        {
+            return;
+        }
+
         Entity entity = event.getRightClicked();
         FPlayer fPlayer = plugin.pl.getPlayer(player);
 

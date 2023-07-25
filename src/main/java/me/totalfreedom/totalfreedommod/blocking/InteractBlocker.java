@@ -4,6 +4,7 @@ import me.totalfreedom.totalfreedommod.FreedomService;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
 import me.totalfreedom.totalfreedommod.util.Groups;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
@@ -69,6 +70,10 @@ public class InteractBlocker extends FreedomService
     private void handleRightClick(PlayerInteractEvent event)
     {
         final Player player = event.getPlayer();
+        if (player.getGameMode().equals(GameMode.SPECTATOR)) {
+            return;
+        }
+
         final Block clickedBlock = event.getClickedBlock();
 
         if (clickedBlock != null && clickedBlock.getType() == Material.RESPAWN_ANCHOR && !ConfigEntry.ALLOW_RESPAWN_ANCHORS.getBoolean())
