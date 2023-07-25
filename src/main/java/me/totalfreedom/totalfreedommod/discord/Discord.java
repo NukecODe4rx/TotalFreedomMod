@@ -279,12 +279,6 @@ public class Discord extends FreedomService
     {
         String newMessage = message;
 
-        if (message.contains("@"))
-        {
-            // \u200B is Zero Width Space, invisible on Discord
-            newMessage = message.replaceAll("@", "@\u200B");
-        }
-
         if (message.toLowerCase().contains("discord.gg")) // discord.gg/invite works as an invite
         {
             return "";
@@ -300,10 +294,10 @@ public class Discord extends FreedomService
 
         if (message.contains("§"))
         {
-            newMessage = message.replaceAll("§", "");
+            newMessage = message.replace("§", "");
         }
 
-        return deformat(newMessage);
+        return newMessage;
     }
 
     public void messageChatChannel(String message)
@@ -321,7 +315,7 @@ public class Discord extends FreedomService
 
         if (enabled && !chat_channel_id.isEmpty())
         {
-            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).submit(true);
+            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).allowedMentions(Collections.emptyList()).submit(true);
             sentMessages.add(sentMessage);
         }
     }
@@ -341,7 +335,7 @@ public class Discord extends FreedomService
 
         if (enabled && !chat_channel_id.isEmpty())
         {
-            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).submit(true);
+            CompletableFuture<Message> sentMessage = Objects.requireNonNull(bot.getTextChannelById(chat_channel_id)).sendMessage(sanitizedMessage).allowedMentions(Collections.emptyList()).submit(true);
             sentMessages.add(sentMessage);
         }
     }
@@ -512,6 +506,6 @@ public class Discord extends FreedomService
             return;
         }
 
-        messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message));
+        messageChatChannel(deformat(player.getName()) + " \u00BB " + ChatColor.stripColor(message));
     }
 }
