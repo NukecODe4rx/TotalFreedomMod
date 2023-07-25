@@ -26,7 +26,7 @@ public class InteractBlocker extends FreedomService
     {
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event)
     {
         switch (event.getAction())

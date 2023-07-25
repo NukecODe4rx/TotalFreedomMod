@@ -95,7 +95,7 @@ public class ItemFun extends FreedomService
     {
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerEntityInteract(PlayerInteractEntityEvent event)
     {
 
