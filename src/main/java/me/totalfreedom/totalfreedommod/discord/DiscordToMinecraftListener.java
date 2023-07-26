@@ -23,6 +23,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class DiscordToMinecraftListener extends ListenerAdapter
 {
     public void onMessageReceived(MessageReceivedEvent event)
@@ -138,50 +140,30 @@ public class DiscordToMinecraftListener extends ListenerAdapter
         FLog.info(TextComponent.toLegacyText(components), true);
     }
 
+    private boolean hasRole(Guild server, List<Role> roles, String roleId) {
+        return !roleId.isEmpty() && roles.contains(server.getRoleById(roleId));
+    }
 
     public String getDisplay(Member member)
     {
         Guild server = Discord.bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        // Server Owner
         assert server != null;
-        if (member.getRoles().contains(server.getRoleById(ConfigEntry.DISCORD_SERVER_OWNER_ROLE_ID.getString())))
-        {
+        final List<Role> roles = member.getRoles();
+        if (hasRole(server, roles, ConfigEntry.DISCORD_SERVER_OWNER_ROLE_ID.getString()))
             return Title.OWNER.getColoredTag();
-        }
-        // Developers
-        else if (member.getRoles().contains(server.getRoleById(ConfigEntry.DISCORD_DEVELOPER_ROLE_ID.getString())))
-        {
+        else if (hasRole(server, roles, ConfigEntry.DISCORD_DEVELOPER_ROLE_ID.getString()))
             return Title.DEVELOPER.getColoredTag();
-        }
-        // Executives
-        else if (member.getRoles().contains(server.getRoleById(ConfigEntry.DISCORD_EXECUTIVE_ROLE_ID.getString())))
-        {
+        else if (hasRole(server, roles, ConfigEntry.DISCORD_EXECUTIVE_ROLE_ID.getString()))
             return Title.EXECUTIVE.getColoredTag();
-        }
-        // Assistant Executives
-        else if (member.getRoles().contains(server.getRoleById(ConfigEntry.DISCORD_ASSISTANT_EXECUTIVE_ROLE_ID.getString())))
-        {
+        else if (hasRole(server, roles, ConfigEntry.DISCORD_ASSISTANT_EXECUTIVE_ROLE_ID.getString()))
             return Title.ASSTEXEC.getColoredTag();
-        }
-        // Senior Admins
-        else if (member.getRoles().contains(server.getRoleById(ConfigEntry.DISCORD_SENIOR_ADMIN_ROLE_ID.getString())))
-        {
+        else if (hasRole(server, roles, ConfigEntry.DISCORD_SENIOR_ADMIN_ROLE_ID.getString()))
             return Rank.SENIOR_ADMIN.getColoredTag();
-        }
-        // Admins
-        else if (member.getRoles().contains(server.getRoleById(ConfigEntry.DISCORD_NEW_ADMIN_ROLE_ID.getString())))
-        {
+        else if (hasRole(server, roles, ConfigEntry.DISCORD_NEW_ADMIN_ROLE_ID.getString()))
             return Rank.ADMIN.getColoredTag();
-        }
-        // Master Builders
-        else if (member.getRoles().contains(server.getRoleById(ConfigEntry.DISCORD_MASTER_BUILDER_ROLE_ID.getString())))
-        {
+        else if (hasRole(server, roles, ConfigEntry.DISCORD_MASTER_BUILDER_ROLE_ID.getString()))
             return Title.MASTER_BUILDER.getColoredTag();
-        }
-        // None
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 }

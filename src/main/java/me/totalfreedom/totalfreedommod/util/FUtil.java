@@ -1,10 +1,9 @@
 package me.totalfreedom.totalfreedommod.util;
 
-import com.earth2me.essentials.utils.DateUtil;
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
@@ -633,7 +632,10 @@ public class FUtil
 
     public static String getUptime()
     {
-        return DateUtil.formatDateDiff(ManagementFactory.getRuntimeMXBean().getStartTime());
+        final long start = ManagementFactory.getRuntimeMXBean().getStartTime();
+        final long end = Instant.now().toEpochMilli();
+
+        return DurationFormatUtils.formatDurationWords(end - start, true, true);
     }
 
     public static double getMaxMem()
