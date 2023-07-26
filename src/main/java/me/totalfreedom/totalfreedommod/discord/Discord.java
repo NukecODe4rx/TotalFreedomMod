@@ -393,7 +393,11 @@ public class Discord extends FreedomService
     {
         if (bot != null)
         {
-            messageChatChannel("**Server has stopped**", true);
+            final String chatChannelId = ConfigEntry.DISCORD_CHAT_CHANNEL_ID.getString();
+            final TextChannel chatChannel = !Strings.isNullOrEmpty(chatChannelId) ? bot.getTextChannelById(chatChannelId) : null;
+            if (chatChannel != null) {
+                chatChannel.sendMessage("**Server has stopped**").submit(true);
+            }
         }
 
         FLog.info("Discord integration has successfully shutdown.");

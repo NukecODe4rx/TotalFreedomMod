@@ -2,7 +2,6 @@ package me.totalfreedom.totalfreedommod.blocking.command;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -16,16 +15,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.plugin.SimplePluginManager;
 
 public class CommandBlocker extends FreedomService
 {
     private final Pattern whitespacePattern = Pattern.compile("^/?( +)(.*)?");
-    private final Pattern flagPattern = Pattern.compile("(:([0-9]){5,})");
     //
     private final Map<String, CommandBlockerEntry> entryList = Maps.newHashMap();
     private final List<String> unknownCommands = Lists.newArrayList();
@@ -79,7 +75,6 @@ public class CommandBlocker extends FreedomService
                 subCommand = StringUtils.join(commandParts, " ", 1, commandParts.length).trim().toLowerCase();
             }
 
-            assert commandMap != null;
             final Command command = commandMap.getCommand(commandName);
 
             // Obtain command from alias
@@ -94,7 +89,6 @@ public class CommandBlocker extends FreedomService
 
             if (entryList.containsKey(commandName))
             {
-                FLog.warning("Not blocking: /" + commandName + " - Duplicate entry exists!");
                 continue;
             }
 
@@ -159,24 +153,6 @@ public class CommandBlocker extends FreedomService
             return true;
         }
 
-        for (String part : commandParts)
-        {
-            if (command.startsWith("/") && !plugin.al.isAdmin(sender) && (part.contains("#copy") || part.contains("#clipboard")))
-            {
-                FUtil.playerMsg(sender, "WorldEdit copy variables are disabled.");
-                return true;
-            }
-            Matcher matcher = flagPattern.matcher(part);
-            if (!matcher.matches())
-            {
-                continue;
-            }
-            if (doAction)
-            {
-                FUtil.playerMsg(sender, "That command contains an illegal number: " + matcher.group(1));
-            }
-            return true;
-        }
 
         // Obtain sub command, if it exists
         String subCommand = null;

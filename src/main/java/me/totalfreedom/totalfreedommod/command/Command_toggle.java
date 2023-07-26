@@ -309,11 +309,7 @@ public class Command_toggle extends FreedomCommand
 
         if (args.length == 1)
         {
-            return Arrays.asList(
-                    "waterplace", "fireplace", "lavaplace", "fluidspread", "lavadmg", "firespread", "frostwalk",
-                    "firework", "prelog", "petprotect", "entitywipe", "nonuke", "explosives", "unsafeenchs",
-                    "bells", "armorstands", "structureblocks", "jigsaws", "grindstones", "jukeboxes", "spawners", "4chan", "beehives",
-                    "respawnanchors", "autotp", "autoclear", "minecarts", "mp44", "landmines", "tossmob", "gravity");
+            return toggles;
         }
         return Collections.emptyList();
     }
