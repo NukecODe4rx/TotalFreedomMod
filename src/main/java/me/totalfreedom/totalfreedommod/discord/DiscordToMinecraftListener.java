@@ -2,7 +2,6 @@ package me.totalfreedom.totalfreedommod.discord;
 
 import me.totalfreedom.totalfreedommod.TotalFreedomMod;
 import me.totalfreedom.totalfreedommod.config.ConfigEntry;
-import me.totalfreedom.totalfreedommod.discord.command.DiscordCommandManager;
 import me.totalfreedom.totalfreedommod.discord.pluralkit.PluralKitMember;
 import me.totalfreedom.totalfreedommod.discord.pluralkit.PluralKitSystem;
 import me.totalfreedom.totalfreedommod.rank.Rank;

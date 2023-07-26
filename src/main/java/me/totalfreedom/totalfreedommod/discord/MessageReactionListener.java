@@ -14,8 +14,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
-import java.util.Collections;
-
 public class MessageReactionListener extends ListenerAdapter
 {
     public void onMessageReactionAdd(MessageReactionAddEvent messageReactionAddEvent)

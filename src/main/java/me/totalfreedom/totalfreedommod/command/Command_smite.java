@@ -35,7 +35,7 @@ public class Command_smite extends FreedomCommand
 
         if (!silent)
         {
-            FUtil.bcastMsg(player.getName() + " has been a naughty, naughty person.", ChatColor.RED);
+            FUtil.bcastMsg(player.getName() + " has been a naughty, naughty player.", ChatColor.RED);
             if (reason != null)
             {
                 FUtil.bcastMsg("  Reason: " + ChatColor.YELLOW + reason, ChatColor.RED);

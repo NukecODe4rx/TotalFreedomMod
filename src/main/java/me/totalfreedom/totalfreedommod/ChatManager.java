@@ -87,6 +87,8 @@ public class ChatManager extends FreedomService
             return;
         }
 
+        plugin.dc.onPlayerChat(player, ChatColor.stripColor(message));
+
         // Check for 4chan trigger
         if (ConfigEntry.FOURCHAN_ENABLED.getBoolean())
         {

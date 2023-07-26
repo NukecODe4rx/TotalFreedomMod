@@ -6,7 +6,6 @@ import me.totalfreedom.totalfreedommod.util.FLog;
 import me.totalfreedom.totalfreedommod.util.Reflections;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 public class DiscordCommandManager
 {
@@ -83,6 +81,7 @@ public class DiscordCommandManager
                     final MessageEmbed embed = embedBuilder.build();
                     channel.sendMessage(MessageCreateData.fromEmbeds(embed)).submit(true);
                 }
+                return true;
             }
         }
 

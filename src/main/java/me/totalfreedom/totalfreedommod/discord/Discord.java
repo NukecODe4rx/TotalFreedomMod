@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,16 +39,16 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +56,6 @@ import org.jetbrains.annotations.NotNull;
 public class Discord extends FreedomService
 {
     private static final ImmutableList<String> DISCORD_SUBDOMAINS = ImmutableList.of("discordapp.com", "discord.com", "discord.gg");
-    private static final Pattern CHAT_COLOR_PATTERN = Pattern.compile("&([0-9a-fA-Fk-oK-OrRxX]|#[a-fA-F0-9]{6})");
 
     private final List<String> messageQueue = new ArrayList<>();
     private final List<String> adminChatMessageQueue = new ArrayList<>();
@@ -299,7 +299,7 @@ public class Discord extends FreedomService
 
         if (deathMessage != null)
         {
-            messageChatChannel("**" + PlainTextComponentSerializer.plainText().serialize(deathMessage) + "**", true);
+            messageChatChannel("**" + deformat(PlainTextComponentSerializer.plainText().serialize(deathMessage)) + "**", true);
         }
     }
 
@@ -314,7 +314,7 @@ public class Discord extends FreedomService
     {
         if (!plugin.al.isVanished(event.getPlayer().getUniqueId()))
         {
-            messageChatChannel("**" + event.getPlayer().getName() + " joined the server" + "**", true);
+            messageChatChannel("**" + deformat(event.getPlayer().getName()) + " joined the server" + "**", true);
         }
     }
 
@@ -323,19 +323,13 @@ public class Discord extends FreedomService
     {
         if (!plugin.al.isVanished(event.getPlayer().getUniqueId()))
         {
-            messageChatChannel("**" + event.getPlayer().getName() + " left the server" + "**", true);
+            messageChatChannel("**" + deformat(event.getPlayer().getName()) + " left the server" + "**", true);
         }
     }
 
     public static String sanitizeChatMessage(String message)
     {
         String newMessage = message;
-
-        if (message.contains("@"))
-        {
-            // \u200B is Zero Width Space, invisible on Discord
-            newMessage = newMessage.replaceAll("@", "@\u200B");
-        }
 
         if (message.toLowerCase().contains("discord.gg")) // discord.gg/invite works as an invite
         {
@@ -352,12 +346,10 @@ public class Discord extends FreedomService
 
         if (message.contains("§"))
         {
-            newMessage = newMessage.replaceAll("§", "");
+            newMessage = message.replaceAll("§", "");
         }
 
-        newMessage = CHAT_COLOR_PATTERN.matcher(newMessage).replaceAll("");
-
-        return deformat(newMessage);
+        return newMessage;
     }
 
     public void messageChatChannel(String message, boolean system)
@@ -425,102 +417,89 @@ public class Discord extends FreedomService
             return false;
         }
 
-        Guild server = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        if (server == null)
-
-        {
-            FLog.severe("The Discord server ID specified is invalid, or the bot is not on the server.");
-            return false;
-        }
-
-        TextChannel channel = server.getTextChannelById(ConfigEntry.DISCORD_REPORT_CHANNEL_ID.getString());
-        if (channel == null)
-        {
-            FLog.severe("The report channel ID specified in the config is invalid.");
-            return false;
-        }
-
         return true;
     }
 
-    public boolean sendReportOffline(Player reporter, OfflinePlayer reported, String reason)
+    public CompletableFuture<Boolean> sendReport(String reporterName, String reportedName, String reason)
     {
-        if (!shouldISendReport())
+        return CompletableFuture.supplyAsync(() ->
         {
-            return false;
-        }
-
-        final Guild server = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        final TextChannel channel = server.getTextChannelById(ConfigEntry.DISCORD_REPORT_CHANNEL_ID.getString());
-
-        final EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Report for " + reported.getName() + " (offline)");
-        embedBuilder.setDescription(reason);
-        embedBuilder.setFooter("Reported by " + reporter.getName(), "https://minotar.net/helm/" + reporter.getName() + ".png");
-        embedBuilder.setTimestamp(Instant.from(ZonedDateTime.now()));
-        if (plugin.esb.isEnabled())
-        {
-            com.earth2me.essentials.User user = plugin.esb.getEssentialsUser(reported.getName());
-            String location = "World: " + Objects.requireNonNull(user.getLastLocation().getWorld()).getName() + ", X: " + user.getLastLocation().getBlockX() + ", Y: " + user.getLastLocation().getBlockY() + ", Z: " + user.getLastLocation().getBlockZ();
-            embedBuilder.addField("Location", location, true);
-            embedBuilder.addField("God Mode", WordUtils.capitalizeFully(String.valueOf(user.isGodModeEnabled())), true);
-            if (user.getNickname() != null)
-            {
-                embedBuilder.addField("Nickname", user.getNickname(), true);
+            if (!shouldISendReport()) {
+                return false;
             }
-        }
-        MessageEmbed embed = embedBuilder.build();
-        Message message = channel.sendMessage(MessageCreateData.fromEmbeds(embed)).complete();
 
-        if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
-        {
-            message.addReaction((Emoji)getEmoji("\uD83D\uDCCB")).complete();
-        }
+            final Guild server = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
 
-        return true;
+            if (server == null)
+            {
+                FLog.severe("The guild ID specified in the config is invalid.");
+                return false;
+            }
+
+            final TextChannel channel = server.getTextChannelById(ConfigEntry.DISCORD_REPORT_CHANNEL_ID.getString());
+
+            if (channel == null)
+            {
+                FLog.severe("The report channel ID specified in the config is invalid.");
+                return false;
+            }
+
+            final Player onlinePlayer = Bukkit.getPlayer(reportedName);
+            boolean online = onlinePlayer != null;
+
+            final EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("Report for " + reportedName + (online ? "" : " (offline)"));
+            embedBuilder.setDescription(reason);
+            embedBuilder.setFooter("Reported by " + reporterName, "https://minotar.net/helm/" + reporterName + ".png");
+            embedBuilder.setTimestamp(Instant.from(ZonedDateTime.now()));
+
+            Location location = null;
+            Boolean godMode = null;
+            String nickName = null;
+
+            if (plugin.esb.isEnabled())
+            {
+                com.earth2me.essentials.User user = plugin.esb.getEssentialsUser(reportedName);
+                if (!online) {
+                    location = user.getLastLocation();
+                }
+
+                godMode = user.isGodModeEnabled();
+                nickName = user.getNickname();
+            }
+
+            if (location == null && online)
+            {
+                location = onlinePlayer.getLocation();
+            }
+
+            if (location != null)
+            {
+                embedBuilder.addField("Location", "World: " + location.getWorld().getName() + ", X: " + location.getBlockX() + ", Y: " + location.getBlockY() + ", Z: " + location.getBlockZ(), true);
+            }
+
+            if (godMode != null)
+            {
+                embedBuilder.addField("God Mode", WordUtils.capitalizeFully(godMode.toString()), true);
+            }
+
+            if (nickName != null)
+            {
+                embedBuilder.addField("Nickname", nickName, true);
+            }
+
+            MessageEmbed embed = embedBuilder.build();
+            Message message = channel.sendMessage(MessageCreateData.fromEmbeds(embed)).complete();
+
+            if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty()) {
+                message.addReaction((Emoji) getEmoji("\uD83D\uDCCB")).complete();
+            }
+
+            return true;
+        }, t -> Bukkit.getScheduler().runTaskAsynchronously(plugin, t));
     }
 
-    public boolean sendReport(Player reporter, Player reported, String reason)
-    {
-        if (!shouldISendReport())
-        {
-            return false;
-        }
-
-        final Guild server = bot.getGuildById(ConfigEntry.DISCORD_SERVER_ID.getString());
-        final TextChannel channel = server.getTextChannelById(ConfigEntry.DISCORD_REPORT_CHANNEL_ID.getString());
-
-        final EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Report for " + reported.getName());
-        embedBuilder.setDescription(reason);
-        embedBuilder.setFooter("Reported by " + reporter.getName(), "https://minotar.net/helm/" + reporter.getName() + ".png");
-        embedBuilder.setTimestamp(Instant.from(ZonedDateTime.now()));
-        String location = "World: " + Objects.requireNonNull(reported.getLocation().getWorld()).getName() + ", X: " + reported.getLocation().getBlockX() + ", Y: " + reported.getLocation().getBlockY() + ", Z: " + reported.getLocation().getBlockZ();
-        embedBuilder.addField("Location", location, true);
-        embedBuilder.addField("Game Mode", WordUtils.capitalizeFully(reported.getGameMode().name()), true);
-
-        if (plugin.esb.isEnabled())
-        {
-            com.earth2me.essentials.User user = plugin.esb.getEssentialsUser(reported.getName());
-            embedBuilder.addField("God Mode", WordUtils.capitalizeFully(String.valueOf(user.isGodModeEnabled())), true);
-            if (user.getNickname() != null)
-            {
-                embedBuilder.addField("Nickname", user.getNickname(), true);
-            }
-        }
-
-        MessageEmbed embed = embedBuilder.build();
-        Message message = channel.sendMessage(MessageCreateData.fromEmbeds(embed)).complete();
-
-        if (!ConfigEntry.DISCORD_REPORT_ARCHIVE_CHANNEL_ID.getString().isEmpty())
-        {
-            message.addReaction((Emoji)getEmoji("\uD83D\uDCCB")).complete();
-        }
-
-        return true;
-    }
-
-    // Do no ask why this is here. I spent two hours trying to make a simple thing work
+    // Do not ask why this is here. I spent two hours trying to make a simple thing work
     public class StartEvent
     {
         public void start()
@@ -529,16 +508,23 @@ public class Discord extends FreedomService
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent event)
+    public void onPlayerChat(Player player, String message)
     {
-        Player player = event.getPlayer();
-        String message = event.getMessage();
-
-        if (!server.hasWhitelist()
-                && !plugin.pl.getPlayer(player).isMuted() && bot != null)
+        if (server.hasWhitelist())
         {
-            messageChatChannel(player.getName() + " \u00BB " + ChatColor.stripColor(message), false);
+            return;
         }
+
+        if (plugin.pl.getPlayer(player).isMuted())
+        {
+            return;
+        }
+
+        if (bot == null) {
+            return;
+        }
+
+        // Upstream runs ChatUtils.stripColor() again here because they're stupid
+        messageChatChannel(player.getName() + " \u00BB " + message, false);
     }
 }

@@ -176,9 +176,4 @@ public class BukkitTelnetBridge extends FreedomService
             FLog.severe("Error removing telnet sessions: " + ex.getMessage());
         }
     }
-
-    public boolean isTelnetSender(final CommandSender sender)
-    {
-        return sender instanceof SessionCommandSender;
-    }
 }

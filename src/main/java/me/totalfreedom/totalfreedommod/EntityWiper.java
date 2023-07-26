@@ -26,6 +26,7 @@ public class EntityWiper extends FreedomService
             EntityType.TEXT_DISPLAY,
             EntityType.ITEM_DISPLAY,
             EntityType.BLOCK_DISPLAY,
+            EntityType.INTERACTION,
             EntityType.MINECART
     );
     private BukkitTask wiper;

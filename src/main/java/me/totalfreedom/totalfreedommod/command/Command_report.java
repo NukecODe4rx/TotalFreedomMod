@@ -76,14 +76,7 @@ public class Command_report extends FreedomCommand
 
         if (plugin.dc.enabled)
         {
-            if (player == null)
-            {
-                plugin.dc.sendReportOffline(playerSender, offlinePlayer, report);
-            }
-            else
-            {
-                plugin.dc.sendReport(playerSender, player, report);
-            }
+            plugin.dc.sendReport(playerSender.getName(), reportedUsername, report).whenCompleteAsync((logged, ex) -> handleLog(logged, ex, sender));
         }
 
         return true;
